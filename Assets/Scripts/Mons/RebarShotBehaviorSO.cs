@@ -4,7 +4,7 @@ using System.Collections;
 [CreateAssetMenu(menuName = "Mons/Attack Behaviors/Rebar Shot")]
 public class RebarShotBehaviorSO : AttackBehaviorSO
 {
-    [SerializeField] private float castWindupSeconds = 0.15f;
+    [SerializeField] private float castWindupSeconds = 1.0f;
 
     public override IEnumerator Execute(AttackContext context)
     {

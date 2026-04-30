@@ -49,8 +49,7 @@ public class CreatureController : MonoBehaviour
         yield return movementComponent.MoveRoutine();
 
         // Once movement is done, grab a target from targeting component.
-        Transform target = null;
-        yield return targetingComponent.AcquireTargetRoutine(acquiredTarget => target = acquiredTarget);
+        Transform target = targetingComponent.GetTarget();
 
         // Once we have a target, start attack coroutine.
         if (target != null)
