@@ -4,12 +4,18 @@ using System.Collections;
 public class CreatureController : MonoBehaviour
 {
     public CreatureDataSO creatureData;
-    
+    [SerializeField] private Team team;
+
     private StatsComponent statsComponent;
     private MovementComponent movementComponent;
     private CombatComponent combatComponent;
     private TargetingComponent targetingComponent;
     private bool _isExecutingBehavior;
+    private CreatureRegistry _registry;
+
+    public Team Team => team;
+    public bool IsDead => statsComponent != null && statsComponent.IsDead();
+    public CreatureRegistry Registry => _registry;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -24,6 +30,16 @@ public class CreatureController : MonoBehaviour
             statsComponent.Initialize(creatureData.maxHP);
             combatComponent.attacks = creatureData.attacks;
         }
+    }
+
+    private void OnEnable()
+    {
+        _registry?.Register(this);
+    }
+
+    private void OnDisable()
+    {
+        _registry?.Unregister(this);
     }
 
     // Update is called once per frame
@@ -58,5 +74,17 @@ public class CreatureController : MonoBehaviour
         }
 
         _isExecutingBehavior = false;
+    }
+
+    public void SetRegistry(CreatureRegistry registry)
+    {
+        if (_registry == registry)
+        {
+            return;
+        }
+
+        _registry?.Unregister(this);
+        _registry = registry;
+        _registry?.Register(this);
     }
 }
