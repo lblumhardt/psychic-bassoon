@@ -13,3 +13,11 @@ MonoBehaviour:
   m_Name: RebarShotBehavior
   m_EditorClassIdentifier: Assembly-CSharp::RebarShotBehaviorSO
   castWindupSeconds: 1
+  rebarProjectilePrefab: {fileID: 190782369819422753, guid: b58a59cdc7ccf504f9d8e8b58cef8e1b, type: 3}
+  projectileSpeed: 20
+  spawnHeightOffset: 0.5
+  spawnForwardOffset: 1.25
+  spawnProbeRadius: 0.15
+  spawnCollisionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295

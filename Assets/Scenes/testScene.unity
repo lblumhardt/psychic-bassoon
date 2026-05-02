@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 11774280}
   - component: {fileID: 11774279}
   - component: {fileID: 11774278}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -243,7 +243,7 @@ GameObject:
   - component: {fileID: 94461972}
   - component: {fileID: 94461971}
   - component: {fileID: 94461970}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -492,7 +492,7 @@ GameObject:
   - component: {fileID: 763380473}
   - component: {fileID: 763380472}
   - component: {fileID: 763380471}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -654,7 +654,7 @@ GameObject:
   - component: {fileID: 1160409530}
   - component: {fileID: 1160409529}
   - component: {fileID: 1160409538}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: creatureB
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -698,6 +698,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovementComponent
   moveDurationSeconds: 5
+  moveDurationVarianceSeconds: 2
   moveSpeed: 2
 --- !u!114 &1160409532
 MonoBehaviour:
@@ -993,7 +994,7 @@ GameObject:
   - component: {fileID: 1790809096}
   - component: {fileID: 1790809095}
   - component: {fileID: 1790809100}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: creatureA
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1132,6 +1133,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MovementComponent
   moveDurationSeconds: 5
+  moveDurationVarianceSeconds: 2
   moveSpeed: 2
 --- !u!114 &1790809098
 MonoBehaviour:
@@ -1200,7 +1202,7 @@ GameObject:
   - component: {fileID: 1967142314}
   - component: {fileID: 1967142313}
   - component: {fileID: 1967142312}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -15,6 +15,6 @@ MonoBehaviour:
   attackName: BLAST
   damage: 5
   cooldown: 1
-  range: 1
+  range: 12.07
   duration: 0.25
   behavior: {fileID: 11400000, guid: 83ff9fdae4d668247b44d7800d862018, type: 2}
