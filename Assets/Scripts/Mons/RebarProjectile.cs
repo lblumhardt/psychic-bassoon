@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
@@ -12,14 +13,25 @@ public class RebarProjectile : MonoBehaviour
     [SerializeField] private float stuckLifetimeSeconds = 10f;
     [SerializeField] private float creatureKnockbackSpeed = 12f;
     [SerializeField] private float creatureKnockbackDurationSeconds = 0.18f;
+    [Tooltip("Two trigger colliders never raise OnTriggerEnter against each other; use overlap to destroy when rebars touch.")]
+    [SerializeField] private float otherRebarOverlapRadius = 0.4f;
+    [Tooltip("Layers used only for overlap checks vs other rebars. Leave empty to use this object's layer.")]
+    [SerializeField] private LayerMask otherRebarOverlapMask;
+
+    private readonly Collider[] _overlapScratch = new Collider[16];
+    private LayerMask _resolvedOtherRebarMask;
 
     private bool _hasLaunched;
     private bool _stuck;
     private bool _pendingStick;
+    private bool _limitTravelDistance;
     private float _travelDistanceRemaining;
     private float _postHitTravelRemaining;
     private Vector3 _lockedTravelVelocity;
     private Transform _owner;
+    private readonly HashSet<CreatureController> _knockedCreatures = new HashSet<CreatureController>();
+
+    public bool HasLaunched => _hasLaunched;
 
     public void Launch(Transform owner, Vector3 direction, float speed, float maxDistance)
     {
@@ -30,7 +42,9 @@ public class RebarProjectile : MonoBehaviour
 
         _hasLaunched = true;
         _owner = owner;
-        _travelDistanceRemaining = Mathf.Max(0f, maxDistance);
+        // maxDistance <= 0: no distance cap — projectile lives until maxLifetimeSeconds (and collisions / stick flow).
+        _limitTravelDistance = maxDistance > 0f;
+        _travelDistanceRemaining = _limitTravelDistance ? maxDistance : 0f;
 
         if (rb == null)
         {
@@ -48,7 +62,11 @@ public class RebarProjectile : MonoBehaviour
         rb.linearVelocity = direction * Mathf.Max(0f, speed);
 
         ApplyCollisionLayerFilter();
+        SetProjectileCollidersTrigger(true);
         IgnoreOwnerCollisions();
+        _resolvedOtherRebarMask = otherRebarOverlapMask.value != 0
+            ? otherRebarOverlapMask
+            : (LayerMask)(1 << gameObject.layer);
         Destroy(gameObject, maxLifetimeSeconds);
     }
 
@@ -93,16 +111,21 @@ public class RebarProjectile : MonoBehaviour
             return;
         }
 
-        if (_travelDistanceRemaining <= 0f)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        TryResolveOtherRebarOverlap();
 
-        _travelDistanceRemaining -= rb.linearVelocity.magnitude * Time.fixedDeltaTime;
+        if (_limitTravelDistance)
+        {
+            if (_travelDistanceRemaining <= 0f)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            _travelDistanceRemaining -= rb.linearVelocity.magnitude * Time.fixedDeltaTime;
+        }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
         if (_stuck || _pendingStick || !_hasLaunched)
         {
@@ -110,27 +133,62 @@ public class RebarProjectile : MonoBehaviour
         }
 
         CreatureController ownerCreature = _owner != null ? _owner.GetComponentInParent<CreatureController>() : null;
-        CreatureController hitCreature = collision.collider.GetComponentInParent<CreatureController>();
+        CreatureController hitCreature = other.GetComponentInParent<CreatureController>();
         if (hitCreature != null && hitCreature != ownerCreature)
         {
-            ApplyCreatureKnockback(hitCreature);
-            Destroy(gameObject);
+            if (_knockedCreatures.Add(hitCreature))
+            {
+                ApplyCreatureKnockback(hitCreature);
+            }
+
             return;
         }
 
-        if (collision.collider.GetComponentInParent<RebarProjectile>() != null)
+        RebarProjectile otherRebar = other.GetComponentInParent<RebarProjectile>();
+        if (otherRebar != null && otherRebar != this && otherRebar.HasLaunched)
         {
             Destroy(gameObject);
             return;
         }
 
-        if ((wallStickLayers.value & (1 << collision.gameObject.layer)) != 0)
+        if ((wallStickLayers.value & (1 << other.gameObject.layer)) != 0)
         {
             BeginDelayedStick();
             return;
         }
 
         Destroy(gameObject);
+    }
+
+    private void TryResolveOtherRebarOverlap()
+    {
+        if (otherRebarOverlapRadius <= 0f || rb == null)
+        {
+            return;
+        }
+
+        int hitCount = Physics.OverlapSphereNonAlloc(
+            rb.position,
+            otherRebarOverlapRadius,
+            _overlapScratch,
+            _resolvedOtherRebarMask,
+            QueryTriggerInteraction.Collide);
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            Collider c = _overlapScratch[i];
+            if (c == null)
+            {
+                continue;
+            }
+
+            RebarProjectile otherRebar = c.GetComponentInParent<RebarProjectile>();
+            if (otherRebar != null && otherRebar != this && otherRebar.HasLaunched)
+            {
+                Destroy(gameObject);
+                return;
+            }
+        }
     }
 
     private void ApplyCreatureKnockback(CreatureController creature)
@@ -171,7 +229,6 @@ public class RebarProjectile : MonoBehaviour
         _lockedTravelVelocity = rb != null && rb.linearVelocity.sqrMagnitude > 0.0001f
             ? rb.linearVelocity
             : transform.forward;
-        SetProjectileCollidersTrigger(true);
     }
 
     private void FreezeInPlace()
@@ -191,6 +248,8 @@ public class RebarProjectile : MonoBehaviour
             rb.isKinematic = true;
             rb.constraints = RigidbodyConstraints.FreezeAll;
         }
+
+        SetProjectileCollidersTrigger(false);
 
         Destroy(gameObject, stuckLifetimeSeconds);
     }

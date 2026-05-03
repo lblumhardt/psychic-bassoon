@@ -48,8 +48,8 @@ public class RebarShotBehaviorSO : AttackBehaviorSO
 
         if (projectile != null)
         {
-            float maxDistance = context.attackData != null ? context.attackData.range : 10f;
-            projectile.Launch(context.caster, direction, projectileSpeed, maxDistance);
+            // No max travel distance — lifetime and collisions are handled on RebarProjectile.
+            projectile.Launch(context.caster, direction, projectileSpeed, maxDistance: 0f);
         }
     }
 }
