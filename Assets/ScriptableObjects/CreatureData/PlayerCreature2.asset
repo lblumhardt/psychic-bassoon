@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 46771c3e0e4674e44bf56285cd924e54, type: 3}
-  m_Name: DebugEnemyData
+  m_Name: PlayerCreature2
   m_EditorClassIdentifier: Assembly-CSharp::CreatureDataSO
-  creaturePrefab: {fileID: 4669927977083519284, guid: bace3e5d8f17ff243b0dc2dbedd63721, type: 3}
-  creatureName: Gooby
-  maxHP: 10
+  creaturePrefab: {fileID: 4669927977083519284, guid: 20872ed9351e10b46ab81d15ef25dc62, type: 3}
+  creatureName: Slamander
+  maxHP: 16
   attack: 5
   defense: 2
   speed: 5

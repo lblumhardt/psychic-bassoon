@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46771c3e0e4674e44bf56285cd924e54, type: 3}
   m_Name: DebugCreatureData1
   m_EditorClassIdentifier: Assembly-CSharp::CreatureDataSO
-  creatureName: Slamander
+  creaturePrefab: {fileID: 4669927977083519284, guid: 20872ed9351e10b46ab81d15ef25dc62, type: 3}
+  creatureName: Goobligon
   maxHP: 10
   attack: 5
   defense: 2

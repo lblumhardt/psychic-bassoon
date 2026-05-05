@@ -3,7 +3,6 @@ using System.Collections;
 
 public class CreatureController : MonoBehaviour
 {
-    public CreatureDataSO creatureData;
     [SerializeField] private Team team;
 
     private StatsComponent statsComponent;
@@ -17,8 +16,7 @@ public class CreatureController : MonoBehaviour
     public bool IsDead => statsComponent != null && statsComponent.IsDead();
     public CreatureRegistry Registry => _registry;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public void Initialize(CreatureDataSO creatureData)
     {
         statsComponent = GetComponent<StatsComponent>();
         movementComponent = GetComponent<MovementComponent>();
@@ -29,6 +27,7 @@ public class CreatureController : MonoBehaviour
         {
             statsComponent.Initialize(creatureData.maxHP);
             combatComponent.attacks = creatureData.attacks;
+            this.gameObject.name = creatureData.creatureName;
         }
     }
 
