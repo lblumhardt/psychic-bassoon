@@ -17,6 +17,7 @@ public class RebarProjectile : MonoBehaviour
     [SerializeField] private float otherRebarOverlapRadius = 0.4f;
     [Tooltip("Layers used only for overlap checks vs other rebars. Leave empty to use this object's layer.")]
     [SerializeField] private LayerMask otherRebarOverlapMask;
+    private float _damage = 5f;
 
     private readonly Collider[] _overlapScratch = new Collider[16];
     private LayerMask _resolvedOtherRebarMask;
@@ -138,6 +139,7 @@ public class RebarProjectile : MonoBehaviour
         {
             if (_knockedCreatures.Add(hitCreature))
             {
+                ApplyDamage(hitCreature);
                 ApplyCreatureKnockback(hitCreature);
             }
 
@@ -188,6 +190,13 @@ public class RebarProjectile : MonoBehaviour
                 Destroy(gameObject);
                 return;
             }
+        }
+    }
+
+    private void ApplyDamage(CreatureController creature) {
+        StatsComponent stats = creature.GetComponent<StatsComponent>();
+        if (stats != null) {
+            stats.TakeDamage(_damage);
         }
     }
 

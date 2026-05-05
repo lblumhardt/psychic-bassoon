@@ -46,6 +46,9 @@ public class CreatureController : MonoBehaviour
     void Update()
     {
         if (statsComponent.IsDead()) {
+            Debug.Log($"{name} is dead");
+            _registry?.Unregister(this);
+            Destroy(gameObject);
             return;
         }
 
