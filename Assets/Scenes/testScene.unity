@@ -734,6 +734,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5047b93689736074f8768651ae051130, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleManager
+  resultDisplaySeconds: 2
+  shopSceneName: ShopScene
+  opponentMonsterPool:
+  - {fileID: 11400000, guid: ebec6e74f7a3eb7489f2f1d3b46d5a25, type: 2}
+  - {fileID: 11400000, guid: 2b9770041df14554ba43bc23566ef7db, type: 2}
 --- !u!4 &1086442774
 Transform:
   m_ObjectHideFlags: 0
@@ -1263,7 +1268,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CombatComponent
   attacks:
-  - {fileID: 11400000, guid: 9850bf0c8b4f3554b8c6054366c80ea1, type: 2}
+  - {fileID: 11400000, guid: e6f81c6a1f7744d588f2f96d3a8cc759, type: 2}
 --- !u!114 &1790809099
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1320,6 +1325,7 @@ MonoBehaviour:
   mode: 5
   bilateralSymmetry: 1
   roundishShape: 1
+  roundishCornerSpan: 10
   resolution: 32
   generateOnStart: 1
   randomizeSeedOnAwake: 1

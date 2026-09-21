@@ -13,9 +13,21 @@ MonoBehaviour:
   m_Name: DebugCreatureData1
   m_EditorClassIdentifier: Assembly-CSharp::CreatureDataSO
   creatureName: Slamander
-  maxHP: 10
-  attack: 5
-  defense: 2
-  speed: 5
-  attacks:
+  baseStats:
+    hp: 9
+    power: 8
+    defense: 4
+    moveSpeed: 6
+    attackSpeed: 5
+  potentialAbilities:
+  - {fileID: 11400000, guid: b5f879419905448b9baf431a7fb23bf2, type: 2}
+  - {fileID: 11400000, guid: 857233f78b5e4b2883829dcdb168b514, type: 2}
+  movePool:
+  - {fileID: 11400000, guid: e6f81c6a1f7744d588f2f96d3a8cc759, type: 2}
   - {fileID: 11400000, guid: 9850bf0c8b4f3554b8c6054366c80ea1, type: 2}
+  - {fileID: 11400000, guid: f435daae2bba4516adddf9e285b15359, type: 2}
+  - {fileID: 11400000, guid: 4f8fac42f2a94ce9b6a8ba394f5fd321, type: 2}
+  - {fileID: 11400000, guid: c810699d6a01432eaba676f3262074e9, type: 2}
+  - {fileID: 11400000, guid: 742a297fb00a483f84f1aa41a609fe55, type: 2}
+  - {fileID: 11400000, guid: 597ff417c351456ab43d0e83263f55d6, type: 2}
+  - {fileID: 11400000, guid: 2ae5b115928b43d08b071cb4d9d25533, type: 2}

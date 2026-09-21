@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31f207eb17474439af12709afc43ab9d, type: 3}
+  m_Name: ShellCharm
+  m_EditorClassIdentifier: Assembly-CSharp::CreatureItemSO
+  displayName: Shell Charm
+  description: A sturdy keepsake. +2 HP, +2 Defense, -1 Move Speed.
+  slot: 0
+  price: 3
+  hp: 2
+  power: 0
+  defense: 2
+  moveSpeed: -1
+  attackSpeed: 0
+  damageMultiplier: 1
+  moveCooldownMultiplier: 1
+  projectileSpeedMultiplier: 1
