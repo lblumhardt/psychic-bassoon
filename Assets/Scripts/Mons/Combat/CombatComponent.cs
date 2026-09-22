@@ -55,6 +55,8 @@ public class CombatComponent : MonoBehaviour
         _nextGlobalAttackTime = now + Mathf.Max(0.05f, baseAttackInterval) /
             context.AttackSpeedMultiplier;
 
+        GetComponent<CreatureVfx>()?.PlayAttack(target);
+
         yield return selectedAttack.behavior.Execute(context);
 
         if (selectedAttack.duration > 0f)

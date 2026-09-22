@@ -10,6 +10,10 @@ public class ArenaGenerator : MonoBehaviour
     private readonly List<Vector3> _playerSpawns = new();
     private readonly List<Vector3> _enemySpawns = new();
     private Material _wallMaterial;
+    private Material _floorMaterial;
+    private Material _playerPadMaterial;
+    private Material _enemyPadMaterial;
+    private Transform _generatedRoot;
 
     public int ArenaIndex { get; private set; }
     public string ArenaName { get; private set; }
@@ -19,6 +23,7 @@ public class ArenaGenerator : MonoBehaviour
         DisableSceneWalls();
         ArenaIndex = Random.Range(0, 10);
         BuildArena(ArenaIndex);
+        AddArenaDecoration();
         Debug.Log($"Arena selected: {ArenaName}", this);
     }
 
@@ -33,6 +38,7 @@ public class ArenaGenerator : MonoBehaviour
     {
         GameObject root = new GameObject($"Generated Arena {index + 1}");
         root.transform.SetParent(transform, false);
+        _generatedRoot = root.transform;
 
         switch (index)
         {
@@ -216,8 +222,69 @@ public class ArenaGenerator : MonoBehaviour
         }
     }
 
+    private void AddArenaDecoration()
+    {
+        if (_generatedRoot == null) return;
+
+        GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        floor.name = "Arena Floor";
+        floor.transform.SetParent(_generatedRoot, false);
+        floor.transform.position = new Vector3(0f, -0.07f, 0f);
+        floor.transform.localScale = new Vector3(30f, 0.1f, 18f);
+        Collider floorCollider = floor.GetComponent<Collider>();
+        if (floorCollider != null) Destroy(floorCollider);
+        floor.GetComponent<Renderer>().sharedMaterial = FloorMaterial();
+
+        GameObject centerLine = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        centerLine.name = "Center Line";
+        centerLine.transform.SetParent(_generatedRoot, false);
+        centerLine.transform.position = new Vector3(0f, -0.005f, 0f);
+        centerLine.transform.localScale = new Vector3(0.08f, 0.015f, 17.6f);
+        Collider lineCollider = centerLine.GetComponent<Collider>();
+        if (lineCollider != null) Destroy(lineCollider);
+        centerLine.GetComponent<Renderer>().sharedMaterial = WallMaterial();
+
+        foreach (Vector3 spawn in _playerSpawns) CreateSpawnPad(spawn, true);
+        foreach (Vector3 spawn in _enemySpawns) CreateSpawnPad(spawn, false);
+    }
+
+    private void CreateSpawnPad(Vector3 position, bool player)
+    {
+        GameObject pad = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        pad.name = player ? "Player Spawn Glow" : "Enemy Spawn Glow";
+        pad.transform.SetParent(_generatedRoot, false);
+        pad.transform.position = position + Vector3.up * 0.005f;
+        pad.transform.localScale = new Vector3(0.95f, 0.015f, 0.95f);
+        Collider collider = pad.GetComponent<Collider>();
+        if (collider != null) Destroy(collider);
+        pad.GetComponent<Renderer>().sharedMaterial = SpawnMaterial(player);
+    }
+
+    private Material FloorMaterial()
+    {
+        if (_floorMaterial != null) return _floorMaterial;
+        Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+        _floorMaterial = new Material(shader) { color = new Color(0.055f, 0.075f, 0.11f) };
+        _floorMaterial.SetFloat("_Smoothness", 0.2f);
+        return _floorMaterial;
+    }
+
+    private Material SpawnMaterial(bool player)
+    {
+        Material material = player ? _playerPadMaterial : _enemyPadMaterial;
+        if (material != null) return material;
+        Color color = player ? new Color(0.08f, 0.3f, 0.48f) : new Color(0.48f, 0.1f, 0.09f);
+        material = CombatVisuals.MakeMaterial(color);
+        if (player) _playerPadMaterial = material;
+        else _enemyPadMaterial = material;
+        return material;
+    }
+
     private void OnDestroy()
     {
         if (_wallMaterial != null) Destroy(_wallMaterial);
+        if (_floorMaterial != null) Destroy(_floorMaterial);
+        if (_playerPadMaterial != null) Destroy(_playerPadMaterial);
+        if (_enemyPadMaterial != null) Destroy(_enemyPadMaterial);
     }
 }

@@ -23,6 +23,7 @@ public class BattleManager : MonoBehaviour
     private bool _roundEnded;
     private VisualElement _battleUiRoot;
     private Label _speedLabel;
+    private int _roundReadyFrame;
 
     public static RoundResult LastResult { get; private set; } = RoundResult.None;
 
@@ -86,16 +87,22 @@ public class BattleManager : MonoBehaviour
             enemySpecies.Add(enemyTemplate.creatureData);
 
         OpponentRoster.PrepareForRound(enemySpecies, Resources.LoadAll<CreatureItemSO>("Items"));
-        if (enemyTemplate != null && OpponentRoster.Members.Count > 0)
+        if (enemyTemplate != null)
         {
-            ConfigureCreature(enemyTemplate, OpponentRoster.Members[0]);
-            for (int i = 1; i < OpponentRoster.Members.Count; i++)
+            enemyTemplate.gameObject.SetActive(false);
+            Destroy(enemyTemplate.gameObject);
+        }
+        if (playerTemplate != null && OpponentRoster.Members.Count > 0)
+        {
+            for (int i = 0; i < OpponentRoster.Members.Count; i++)
             {
-                GameObject teammate = Instantiate(enemyTemplate.gameObject,
-                    enemyTemplate.transform.position, enemyTemplate.transform.rotation);
+                GameObject teammate = Instantiate(playerTemplate.gameObject,
+                    Vector3.zero, playerTemplate.transform.rotation);
                 CreatureInstance member = OpponentRoster.Members[i];
                 teammate.name = $"Opponent {i + 1} - {member.Species.creatureName}";
-                ConfigureCreature(teammate.GetComponent<CreatureController>(), member);
+                CreatureController controller = teammate.GetComponent<CreatureController>();
+                controller.SetTeam(Team.Enemy);
+                ConfigureCreature(controller, member);
             }
         }
 
@@ -119,6 +126,7 @@ public class BattleManager : MonoBehaviour
         }
 
         _roundStarted = HasTeam(_creatureRegistry.playerCreatures) && HasTeam(_creatureRegistry.enemyCreatures);
+        _roundReadyFrame = Time.frameCount + 1;
         if (!_roundStarted)
         {
             Debug.LogWarning("Battle needs at least one player and one enemy creature to start.", this);
@@ -127,7 +135,7 @@ public class BattleManager : MonoBehaviour
 
     private void Update()
     {
-        if (!_roundStarted || _roundEnded) return;
+        if (!_roundStarted || _roundEnded || Time.frameCount < _roundReadyFrame) return;
 
         bool playerAlive = HasLivingCreature(_creatureRegistry.playerCreatures);
         bool enemyAlive = HasLivingCreature(_creatureRegistry.enemyCreatures);
@@ -158,7 +166,7 @@ public class BattleManager : MonoBehaviour
         controls.Add(_speedLabel);
 
         Label roundLabel = ToolkitUi.Label(
-            $"Round {OpponentRoster.RoundNumber} · Enemy team {OpponentRoster.Members.Count}/5 · Spent {OpponentRoster.LastSpent}/10",
+            $"Round {OpponentRoster.RoundNumber} · {_arena.ArenaName} · Enemy {OpponentRoster.Members.Count}/5 · Spent {OpponentRoster.LastSpent}/10",
             14, new Color(0.72f, 0.79f, 0.87f));
         roundLabel.style.marginRight = 12;
         controls.Add(roundLabel);

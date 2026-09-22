@@ -61,6 +61,8 @@ public class PixelArtGenerator : MonoBehaviour
     [SerializeField] [Range(0.05f, 1.5f)] private float lucasAdditiveHybridStrength = 0.55f;
 
     private Texture2D _runtimeTexture;
+    private Texture2D _assignedTexture;
+    private bool _started;
 
     private void Reset()
     {
@@ -77,7 +79,12 @@ public class PixelArtGenerator : MonoBehaviour
 
     private void Start()
     {
-        if (generateOnStart)
+        _started = true;
+        if (_assignedTexture != null)
+        {
+            ApplyAssignedTexture();
+        }
+        else if (generateOnStart)
         {
             Generate();
         }
@@ -85,7 +92,7 @@ public class PixelArtGenerator : MonoBehaviour
 
     private void Update()
     {
-        if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
+        if (_assignedTexture == null && Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
         {
             Generate();
         }
@@ -173,6 +180,30 @@ public class PixelArtGenerator : MonoBehaviour
         _runtimeTexture.Apply(updateMipmaps: false, makeNoLongerReadable: true);
 
         quadRenderer.material.mainTexture = _runtimeTexture;
+    }
+
+    public void SetCreatureTexture(Texture2D texture)
+    {
+        _assignedTexture = texture;
+        if (_assignedTexture != null)
+        {
+            generateOnStart = false;
+            ApplyAssignedTexture();
+        }
+        else
+        {
+            generateOnStart = true;
+            if (_started) Generate();
+        }
+    }
+
+    private void ApplyAssignedTexture()
+    {
+        if (quadRenderer == null)
+            quadRenderer = GetComponentInChildren<MeshRenderer>();
+        if (quadRenderer == null || _assignedTexture == null) return;
+        DestroyRuntimeTexture();
+        quadRenderer.material.mainTexture = _assignedTexture;
     }
 
     private void DestroyRuntimeTexture()

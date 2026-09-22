@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46771c3e0e4674e44bf56285cd924e54, type: 3}
+  m_Name: Looners
+  m_EditorClassIdentifier: Assembly-CSharp::CreatureDataSO
+  creatureName: Looners
+  creatureTexture: {fileID: 2800000, guid: 21b9d6e6d8625a145a7a8df08b7a01ab, type: 3}
+  baseStats:
+    hp: 8
+    power: 6
+    defense: 4
+    moveSpeed: 8
+    attackSpeed: 6
+  movePool:
+  - {fileID: 11400000, guid: 4f8fac42f2a94ce9b6a8ba394f5fd321, type: 2}
+  - {fileID: 11400000, guid: 2ae5b115928b43d08b071cb4d9d25533, type: 2}
+  - {fileID: 11400000, guid: 597ff417c351456ab43d0e83263f55d6, type: 2}
+  - {fileID: 11400000, guid: e6f81c6a1f7744d588f2f96d3a8cc759, type: 2}
+  potentialAbilities:
+  - {fileID: 11400000, guid: b5f879419905448b9baf431a7fb23bf2, type: 2}
+  - {fileID: 11400000, guid: 857233f78b5e4b2883829dcdb168b514, type: 2}

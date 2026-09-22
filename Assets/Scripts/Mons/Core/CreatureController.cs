@@ -46,6 +46,12 @@ public class CreatureController : MonoBehaviour
 
     private void Awake()
     {
+        // The root primitive is retained for its collider and Rigidbody only.
+        // Creature art is rendered by the child sprite quad.
+        MeshRenderer rootRenderer = GetComponent<MeshRenderer>();
+        if (rootRenderer != null) rootRenderer.enabled = false;
+        foreach (MeshCollider spriteCollider in GetComponentsInChildren<MeshCollider>())
+            spriteCollider.enabled = false;
         statsComponent = GetComponent<StatsComponent>();
         movementComponent = GetComponent<MovementComponent>();
         combatComponent = GetComponent<CombatComponent>();
@@ -71,6 +77,10 @@ public class CreatureController : MonoBehaviour
         {
             gameObject.AddComponent<CreatureHealthBar>();
         }
+        if (GetComponent<CreatureVfx>() == null)
+        {
+            gameObject.AddComponent<CreatureVfx>();
+        }
     }
 
     public void Configure(CreatureDataSO data, IReadOnlyList<AttackDataSO> moves,
@@ -84,7 +94,15 @@ public class CreatureController : MonoBehaviour
         _statsAssigned = true;
         _heldItem = heldItem;
         _spray = spray;
-        if (_initialized) ApplyCreatureData();
+        // Configure can run while BattleManager.Start is still creating the teams.
+        // Apply immediately so a newly cloned creature never spends a frame at 0 HP.
+        ApplyCreatureData();
+    }
+
+    public void SetTeam(Team newTeam)
+    {
+        team = newTeam;
+        GetComponent<CreatureVfx>()?.RefreshTeamVisual();
     }
 
     private float ItemMultiplier(System.Func<CreatureItemSO, float> selector)
@@ -99,6 +117,8 @@ public class CreatureController : MonoBehaviour
     {
         if (creatureData == null) return;
 
+        PixelArtGenerator visuals = GetComponent<PixelArtGenerator>();
+        if (visuals != null) visuals.SetCreatureTexture(creatureData.creatureTexture);
         statsComponent.Initialize(_runtimeStats);
         if (_equippedMoves != null)
         {

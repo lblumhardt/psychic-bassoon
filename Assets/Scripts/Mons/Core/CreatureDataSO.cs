@@ -6,6 +6,7 @@ using UnityEngine.Serialization;
 public class CreatureDataSO : ScriptableObject
 {
     public string creatureName;
+    public Texture2D creatureTexture;
     public CreatureStats baseStats = new CreatureStats(10, 5, 5, 5, 5);
 
     [FormerlySerializedAs("attacks")]
