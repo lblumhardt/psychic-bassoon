@@ -102,6 +102,7 @@ public class CreatureController : MonoBehaviour
     public void SetTeam(Team newTeam)
     {
         team = newTeam;
+        GetComponent<PixelArtGenerator>()?.SetTeamOutline(TeamOutlineColor());
         GetComponent<CreatureVfx>()?.RefreshTeamVisual();
     }
 
@@ -118,7 +119,11 @@ public class CreatureController : MonoBehaviour
         if (creatureData == null) return;
 
         PixelArtGenerator visuals = GetComponent<PixelArtGenerator>();
-        if (visuals != null) visuals.SetCreatureTexture(creatureData.creatureTexture);
+        if (visuals != null)
+        {
+            visuals.SetCreatureTexture(creatureData.creatureTexture);
+            visuals.SetTeamOutline(TeamOutlineColor());
+        }
         statsComponent.Initialize(_runtimeStats);
         if (_equippedMoves != null)
         {
@@ -137,6 +142,13 @@ public class CreatureController : MonoBehaviour
             }
         }
         combatComponent.ConfigureMoves(defaults);
+    }
+
+    private Color TeamOutlineColor()
+    {
+        return team == Team.Player
+            ? new Color(0.12f, 0.65f, 1f, 1f)
+            : new Color(1f, 0.16f, 0.12f, 1f);
     }
 
     private void OnEnable()

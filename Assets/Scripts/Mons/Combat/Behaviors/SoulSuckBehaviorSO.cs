@@ -21,8 +21,8 @@ public class SoulSuckBehaviorSO : AttackBehaviorSO
         if (casterStats == null || victimStats == null) yield break;
 
         float damage = context.Damage;
-        float drained = victimStats.TakeDamage(damage);
-        casterStats.Heal(drained * 0.5f);
+        float drained = victimStats.TakeDamage(damage, caster);
+        casterStats.Heal(drained * 0.5f, caster);
 
         GameObject beamObject = new GameObject("Soul Suck Beam");
         LineRenderer beam = beamObject.AddComponent<LineRenderer>();

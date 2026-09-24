@@ -4,6 +4,7 @@ using UnityEngine;
 public class PackedLunchPickup : MonoBehaviour
 {
     private CreatureRegistry _registry;
+    private CreatureController _source;
     private Team _ownerTeam;
     private Vector3 _start;
     private Vector3 _end;
@@ -18,9 +19,10 @@ public class PackedLunchPickup : MonoBehaviour
     private Material _boxMaterial;
     private Material _outlineMaterial;
 
-    public void Initialize(CreatureRegistry registry, Team ownerTeam, Vector3 start, Vector3 end,
+    public void Initialize(CreatureController source, CreatureRegistry registry, Team ownerTeam, Vector3 start, Vector3 end,
         float heal, float damage, float lobSeconds, float arcHeight, float lifetime, float pickupRadius)
     {
+        _source = source;
         _registry = registry;
         _ownerTeam = ownerTeam;
         _start = start;
@@ -90,11 +92,11 @@ public class PackedLunchPickup : MonoBehaviour
             if (stats == null) continue;
             if (ally)
             {
-                if (stats.Heal(_heal) > 0f) return true;
+                if (stats.Heal(_heal, _source) > 0f) return true;
             }
             else
             {
-                stats.TakeDamage(_damage);
+                stats.TakeDamage(_damage, _source);
                 return true;
             }
         }

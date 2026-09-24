@@ -74,7 +74,7 @@ public class FissureZone : MonoBehaviour
                 float t = Mathf.Clamp01(Vector3.Dot(position - a, segment) / segment.sqrMagnitude);
                 if ((position - (a + segment * t)).sqrMagnitude > _width * _width) continue;
 
-                if (damage > 0f) opponent.GetComponent<StatsComponent>()?.TakeDamage(damage);
+                if (damage > 0f) opponent.GetComponent<StatsComponent>()?.TakeDamage(damage, _caster);
                 opponent.GetComponent<MovementComponent>()?.ApplySlow(_slowMultiplier, _slowRefresh);
                 break;
             }

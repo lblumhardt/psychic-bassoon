@@ -16,7 +16,7 @@ public class MainMenuPage : MonoBehaviour
         title.style.marginBottom = 14;
         root.Add(title);
 
-        Label subtitle = ToolkitUi.Label("Build a team. Survive the next round.", 20,
+        Label subtitle = ToolkitUi.Label("Reach 10 wins. Three losses ends your run.", 20,
             new Color(0.74f, 0.8f, 0.88f));
         subtitle.style.marginBottom = 36;
         root.Add(subtitle);
@@ -29,9 +29,7 @@ public class MainMenuPage : MonoBehaviour
 
     private void StartRun()
     {
-        RunRoster.Reset();
-        OpponentRoster.Reset();
-        BattleManager.ResetResult();
+        RunProgress.StartNewRun();
         SceneManager.LoadScene(shopSceneName);
     }
 }

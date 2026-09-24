@@ -17,7 +17,7 @@ public class FruitTossBehaviorSO : AttackBehaviorSO
         if (caster == null || caster.Registry == null) yield break;
 
         GameObject apple = new GameObject("Fruit Toss Apple");
-        apple.AddComponent<FruitProjectile>().Initialize(caster.Registry, caster.Team,
+        apple.AddComponent<FruitProjectile>().Initialize(caster, caster.Registry, caster.Team,
             context.caster.position, context.target.position,
             context.Damage,
             Mathf.Max(0.05f, flightSeconds / caster.ProjectileSpeedMultiplier),

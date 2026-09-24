@@ -2,8 +2,6 @@ using UnityEngine;
 
 public static class CombatVfxBurst
 {
-    private static Material _playerMarker;
-    private static Material _enemyMarker;
     private static Material _particleMaterial;
 
     public static void Spawn(Vector3 position, Color color, int count, float speed, float lifetime)
@@ -43,17 +41,6 @@ public static class CombatVfxBurst
         particles.Emit(Mathf.Max(1, count));
         particles.Play();
         Object.Destroy(effect, lifetime + 0.3f);
-    }
-
-    public static Material TeamMarkerMaterial(Color color)
-    {
-        bool player = color.b > color.r;
-        Material cached = player ? _playerMarker : _enemyMarker;
-        if (cached != null) return cached;
-        Material material = CombatVisuals.MakeMaterial(new Color(color.r, color.g, color.b, 0.38f));
-        if (player) _playerMarker = material;
-        else _enemyMarker = material;
-        return material;
     }
 
     private static Material ParticleMaterial()

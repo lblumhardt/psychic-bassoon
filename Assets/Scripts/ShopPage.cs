@@ -88,7 +88,7 @@ public class ShopPage : MonoBehaviour
             RoundResult.Loss => "Last round: Defeat",
             _ => "First round"
         };
-        header.Add(ToolkitUi.Label(result, 16, muted));
+        header.Add(ToolkitUi.Label($"{result}\n{RunProgress.Summary}", 16, muted));
 
         VisualElement bank = new();
         bank.style.flexDirection = FlexDirection.Row;
@@ -168,6 +168,10 @@ public class ShopPage : MonoBehaviour
         Button buy = ToolkitUi.Button($"Buy · {CreaturePrice}", () => BuyCreature(index));
         buy.SetEnabled(_money >= CreaturePrice && RunRoster.Members.Count < RunRoster.MaxMembers);
         card.Add(buy);
+        Button upgrade = ToolkitUi.Button($"Upgrade · {CreaturePrice}", () => ShowMergeChoices(offer, index));
+        upgrade.style.marginTop = 4;
+        upgrade.SetEnabled(_money >= CreaturePrice && HasMergeTarget(offer));
+        card.Add(upgrade);
     }
 
     private void AddItemCard(VisualElement offers, int index, Color cardColor, Color muted)
@@ -218,6 +222,7 @@ public class ShopPage : MonoBehaviour
         VisualElement identity = new();
         identity.style.flexGrow = 1;
         identity.Add(ToolkitUi.Label($"{index + 1}. {member.Species.creatureName}", 19, Color.white, true));
+        identity.Add(ToolkitUi.Label(member.LevelSummary, 13, new Color(0.45f, 0.8f, 1f)));
         identity.Add(ToolkitUi.Label(
             $"Held: {ItemName(member.HeldItem)}   Spray: {ItemName(member.Spray)}", 13, muted));
         row.Add(identity);
@@ -228,6 +233,11 @@ public class ShopPage : MonoBehaviour
             14, muted);
         statLabel.style.marginRight = 16;
         row.Add(statLabel);
+
+        Button merge = ToolkitUi.Button("Merge into…", () => ShowMergeChoices(member, -1));
+        merge.SetEnabled(HasMergeTarget(member));
+        merge.style.marginRight = 8;
+        row.Add(merge);
 
         if (_pendingItemIndex >= 0 && _itemOffers[_pendingItemIndex] != null)
         {
@@ -247,6 +257,100 @@ public class ShopPage : MonoBehaviour
             _money < CreaturePrice || !RunRoster.TryAdd(_creatureOffers[index])) return;
         _money -= CreaturePrice;
         _creatureOffers[index] = null;
+        _pendingItemIndex = -1;
+        Render();
+    }
+
+    private static bool HasMergeTarget(CreatureInstance donor)
+    {
+        foreach (CreatureInstance member in RunRoster.Members)
+            if (member.CanMerge(donor)) return true;
+        return false;
+    }
+
+    private void ShowMergeChoices(CreatureInstance donor, int shopIndex)
+    {
+        if (donor == null || !HasMergeTarget(donor)) return;
+        VisualElement overlay = new();
+        overlay.style.position = Position.Absolute;
+        overlay.style.left = overlay.style.right = overlay.style.top = overlay.style.bottom = 0;
+        overlay.style.backgroundColor = new Color(0f, 0f, 0f, 0.8f);
+        overlay.style.justifyContent = Justify.Center;
+        overlay.style.alignItems = Align.Center;
+        _root.Add(overlay);
+
+        VisualElement panel = ToolkitUi.Panel(new Color(0.08f, 0.12f, 0.18f));
+        panel.style.width = Length.Percent(85);
+        panel.style.maxWidth = 950;
+        panel.style.maxHeight = Length.Percent(90);
+        overlay.Add(panel);
+        panel.Add(ToolkitUi.Label($"Merge {donor.Species.creatureName} into…", 25, Color.white, true));
+        Label rules = ToolkitUi.Label(
+            $"Consumes the selected {(shopIndex >= 0 ? "shop" : "roster")} creature" +
+            (shopIndex >= 0 ? $" for {CreaturePrice} money. " : ". ") +
+            $"Contributes {donor.CopyCount} {(donor.CopyCount == 1 ? "copy" : "copies")}.\n" +
+            "The receiving creature keeps its moves, ability, item, and spray.\n" +
+            $"Discarded: held item {ItemName(donor.HeldItem)}; spray {ItemName(donor.Spray)}.\n" +
+            "Level 2 needs 2 extra copies; level 3 needs 3 more. Each level adds 25% of original stats, rounded up.",
+            15, new Color(0.8f, 0.86f, 0.94f));
+        rules.style.whiteSpace = WhiteSpace.Normal;
+        rules.style.marginTop = rules.style.marginBottom = 12;
+        panel.Add(rules);
+
+        ScrollView choices = new();
+        choices.style.flexShrink = 1;
+        choices.style.minHeight = 0;
+        panel.Add(choices);
+        for (int i = 0; i < RunRoster.Members.Count; i++)
+        {
+            CreatureInstance receiver = RunRoster.Members[i];
+            if (!receiver.CanMerge(donor)) continue;
+            VisualElement choice = ToolkitUi.Panel(new Color(0.12f, 0.17f, 0.24f));
+            choice.style.marginBottom = 8;
+            choices.Add(choice);
+            choice.Add(ToolkitUi.Label($"{i + 1}. {receiver.Species.creatureName} · {receiver.LevelSummary}",
+                18, Color.white, true));
+            choice.Add(ToolkitUi.Label($"After merge: {receiver.PreviewMergeProgress(donor)}", 15,
+                new Color(0.45f, 0.8f, 1f)));
+            CreatureStats before = receiver.Stats;
+            CreatureStats after = receiver.PreviewMergeStats(donor);
+            Label preview = ToolkitUi.Label(
+                $"HP {before.hp} → {after.hp}   PWR {before.power} → {after.power}   DEF {before.defense} → {after.defense}\n" +
+                $"MOVE {before.moveSpeed} → {after.moveSpeed}   ATK SPD {before.attackSpeed} → {after.attackSpeed}\n" +
+                $"Keeps: {ItemName(receiver.HeldItem)} / {ItemName(receiver.Spray)} · " +
+                $"{MoveName(receiver, 0)} / {MoveName(receiver, 1)} · " +
+                (receiver.Ability != null ? receiver.Ability.DisplayName : "No ability"), 14, Color.white);
+            preview.style.whiteSpace = WhiteSpace.Normal;
+            choice.Add(preview);
+            int excess = receiver.CopyCount + donor.CopyCount - CreatureInstance.LevelThreeCopies;
+            if (excess > 0)
+                choice.Add(ToolkitUi.Label($"{excess} excess copies will be lost at max level.",
+                    14, new Color(1f, 0.8f, 0.35f)));
+            Button confirm = ToolkitUi.Button(shopIndex >= 0 ? $"Upgrade this creature · {CreaturePrice}" : "Merge into this creature",
+                () => CompleteMerge(donor, receiver, shopIndex));
+            confirm.style.marginTop = 6;
+            choice.Add(confirm);
+        }
+        Button cancel = ToolkitUi.Button("Cancel", () => overlay.RemoveFromHierarchy());
+        cancel.style.marginTop = 10;
+        cancel.style.flexShrink = 0;
+        panel.Add(cancel);
+    }
+
+    private void CompleteMerge(CreatureInstance donor, CreatureInstance receiver, int shopIndex)
+    {
+        bool receiverInRoster = false;
+        foreach (CreatureInstance member in RunRoster.Members)
+            if (ReferenceEquals(member, receiver)) receiverInRoster = true;
+        if (!receiverInRoster) return;
+        if (shopIndex >= 0)
+        {
+            if (shopIndex >= _creatureOffers.Length || !ReferenceEquals(_creatureOffers[shopIndex], donor) ||
+                _money < CreaturePrice || !receiver.TryMerge(donor)) return;
+            _money -= CreaturePrice;
+            _creatureOffers[shopIndex] = null;
+        }
+        else if (!RunRoster.TryMerge(donor, receiver)) return;
         _pendingItemIndex = -1;
         Render();
     }

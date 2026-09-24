@@ -18,7 +18,7 @@ public class FireworkBehaviorSO : AttackBehaviorSO
         if (caster == null || caster.Registry == null) yield break;
 
         GameObject rocket = new GameObject("Firework Rocket");
-        rocket.AddComponent<FireworkRocket>().Initialize(caster.Registry, caster.Team,
+        rocket.AddComponent<FireworkRocket>().Initialize(caster, caster.Registry, caster.Team,
             context.caster.position, context.target.position,
             context.Damage,
             rocketFlightSeconds / caster.ProjectileSpeedMultiplier,

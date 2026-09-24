@@ -83,7 +83,7 @@ public class RainCloudZone : MonoBehaviour
             if (delta.sqrMagnitude > radiusSquared) continue;
             if (_nextDamageTime.TryGetValue(opponent, out float nextTime) && Time.time < nextTime) continue;
 
-            opponent.GetComponent<StatsComponent>()?.TakeDamage(_damage);
+            opponent.GetComponent<StatsComponent>()?.TakeDamage(_damage, _caster);
             _nextDamageTime[opponent] = Time.time + _interval;
         }
     }

@@ -47,7 +47,7 @@ public class PackedLunchBehaviorSO : AttackBehaviorSO
         end.y = start.y;
 
         GameObject lunch = new GameObject("Packed Lunch");
-        lunch.AddComponent<PackedLunchPickup>().Initialize(caster.Registry, caster.Team, start, end,
+        lunch.AddComponent<PackedLunchPickup>().Initialize(caster, caster.Registry, caster.Team, start, end,
             context.Damage, opponentDamage,
             lobSeconds / caster.ProjectileSpeedMultiplier,
             arcHeight, pickupLifetimeSeconds, pickupRadius);

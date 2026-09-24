@@ -3,6 +3,7 @@ using UnityEngine;
 public class FruitProjectile : MonoBehaviour
 {
     private CreatureRegistry _registry;
+    private CreatureController _source;
     private Team _team;
     private Vector3 _start;
     private Vector3 _end;
@@ -17,9 +18,10 @@ public class FruitProjectile : MonoBehaviour
     private Material _greenMaterial;
     private Material _shadowMaterial;
 
-    public void Initialize(CreatureRegistry registry, Team team, Vector3 start, Vector3 end,
+    public void Initialize(CreatureController source, CreatureRegistry registry, Team team, Vector3 start, Vector3 end,
         float damage, float flightSeconds, float arcHeight, float impactRadius)
     {
+        _source = source;
         _registry = registry;
         _team = team;
         _start = start;
@@ -62,7 +64,7 @@ public class FruitProjectile : MonoBehaviour
                 Vector3 delta = opponent.transform.position - _end;
                 delta.y = 0f;
                 if (delta.sqrMagnitude <= _impactRadius * _impactRadius)
-                    opponent.GetComponent<StatsComponent>()?.TakeDamage(_damage);
+                    opponent.GetComponent<StatsComponent>()?.TakeDamage(_damage, _source);
             }
         }
         Destroy(gameObject);

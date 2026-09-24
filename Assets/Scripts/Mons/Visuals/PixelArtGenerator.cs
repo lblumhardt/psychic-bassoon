@@ -62,6 +62,7 @@ public class PixelArtGenerator : MonoBehaviour
 
     private Texture2D _runtimeTexture;
     private Texture2D _assignedTexture;
+    private Material _outlineMaterial;
     private bool _started;
 
     private void Reset()
@@ -101,6 +102,7 @@ public class PixelArtGenerator : MonoBehaviour
     private void OnDestroy()
     {
         DestroyRuntimeTexture();
+        if (_outlineMaterial != null) Destroy(_outlineMaterial);
     }
 
     [ContextMenu("Regenerate pixel art")]
@@ -179,7 +181,7 @@ public class PixelArtGenerator : MonoBehaviour
         _runtimeTexture.SetPixels32(pixels);
         _runtimeTexture.Apply(updateMipmaps: false, makeNoLongerReadable: true);
 
-        quadRenderer.material.mainTexture = _runtimeTexture;
+        ApplyTexture(_runtimeTexture);
     }
 
     public void SetCreatureTexture(Texture2D texture)
@@ -197,13 +199,56 @@ public class PixelArtGenerator : MonoBehaviour
         }
     }
 
+    public void SetTeamOutline(Color color)
+    {
+        if (quadRenderer == null)
+            quadRenderer = GetComponentInChildren<MeshRenderer>();
+        if (quadRenderer == null) return;
+
+        Shader shader = Shader.Find("Mons/Team Outlined Sprite");
+        if (shader == null)
+        {
+            Debug.LogWarning("Team outline shader could not be found.", this);
+            return;
+        }
+
+        Texture texture = _assignedTexture != null
+            ? _assignedTexture
+            : (_runtimeTexture != null
+                ? _runtimeTexture
+                : (quadRenderer.sharedMaterial != null ? quadRenderer.sharedMaterial.mainTexture : null));
+        if (_outlineMaterial == null || _outlineMaterial.shader != shader)
+        {
+            if (_outlineMaterial != null) Destroy(_outlineMaterial);
+            _outlineMaterial = new Material(shader) { name = $"{name} Team Outline" };
+        }
+        _outlineMaterial.SetTexture("_MainTex", texture);
+        _outlineMaterial.SetColor("_Color", Color.white);
+        _outlineMaterial.SetColor("_OutlineColor", color);
+        _outlineMaterial.SetFloat("_OutlineWidth", 1.25f);
+        quadRenderer.sharedMaterial = _outlineMaterial;
+    }
+
     private void ApplyAssignedTexture()
     {
         if (quadRenderer == null)
             quadRenderer = GetComponentInChildren<MeshRenderer>();
         if (quadRenderer == null || _assignedTexture == null) return;
         DestroyRuntimeTexture();
-        quadRenderer.material.mainTexture = _assignedTexture;
+        ApplyTexture(_assignedTexture);
+    }
+
+    private void ApplyTexture(Texture texture)
+    {
+        if (_outlineMaterial != null)
+        {
+            _outlineMaterial.SetTexture("_MainTex", texture);
+            quadRenderer.sharedMaterial = _outlineMaterial;
+        }
+        else
+        {
+            quadRenderer.material.mainTexture = texture;
+        }
     }
 
     private void DestroyRuntimeTexture()

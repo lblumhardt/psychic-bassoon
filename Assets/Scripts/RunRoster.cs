@@ -23,7 +23,8 @@ public static class RunRoster
 
     public static bool TryAdd(CreatureInstance creature)
     {
-        if (creature == null || creature.Species == null || Creatures.Count >= MaxMembers) return false;
+        if (creature == null || creature.IsConsumed || creature.Species == null ||
+            Creatures.Contains(creature) || Creatures.Count >= MaxMembers) return false;
         Creatures.Add(creature);
         return true;
     }
@@ -34,5 +35,13 @@ public static class RunRoster
         CreatureInstance sold = Creatures[index];
         Creatures.RemoveAt(index);
         return sold;
+    }
+
+    public static bool TryMerge(CreatureInstance donor, CreatureInstance receiver)
+    {
+        if (!Creatures.Contains(donor) || !Creatures.Contains(receiver) ||
+            !receiver.TryMerge(donor)) return false;
+        Creatures.Remove(donor);
+        return true;
     }
 }

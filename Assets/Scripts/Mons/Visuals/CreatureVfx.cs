@@ -19,7 +19,6 @@ public class CreatureVfx : MonoBehaviour
         _renderers = GetComponentsInChildren<Renderer>();
         _properties = new MaterialPropertyBlock();
         RefreshTeamColor();
-        CreateGroundMarker();
     }
 
     private void OnEnable()
@@ -49,9 +48,6 @@ public class CreatureVfx : MonoBehaviour
     public void RefreshTeamVisual()
     {
         RefreshTeamColor();
-        Transform marker = transform.Find("Team Ground Marker");
-        if (marker != null && marker.TryGetComponent(out Renderer markerRenderer))
-            markerRenderer.sharedMaterial = CombatVfxBurst.TeamMarkerMaterial(_teamColor);
     }
 
     private void RefreshTeamColor()
@@ -149,8 +145,6 @@ public class CreatureVfx : MonoBehaviour
 
         Transform healthBar = transform.Find("Health Bar");
         if (healthBar != null) healthBar.gameObject.SetActive(false);
-        Transform groundMarker = transform.Find("Team Ground Marker");
-        if (groundMarker != null) groundMarker.gameObject.SetActive(false);
     }
 
     private IEnumerator KnockoutRoutine()
@@ -207,15 +201,4 @@ public class CreatureVfx : MonoBehaviour
                 renderer.SetPropertyBlock(null);
     }
 
-    private void CreateGroundMarker()
-    {
-        GameObject marker = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        marker.name = "Team Ground Marker";
-        marker.transform.SetParent(transform, false);
-        marker.transform.localPosition = new Vector3(0f, 0.025f, 0f);
-        marker.transform.localScale = new Vector3(0.72f, 0.012f, 0.72f);
-        Collider markerCollider = marker.GetComponent<Collider>();
-        if (markerCollider != null) Destroy(markerCollider);
-        marker.GetComponent<Renderer>().sharedMaterial = CombatVfxBurst.TeamMarkerMaterial(_teamColor);
-    }
 }

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -13,7 +12,6 @@ public enum RoundResult
 
 public class BattleManager : MonoBehaviour
 {
-    [SerializeField] private float resultDisplaySeconds = 2f;
     [SerializeField] private string shopSceneName = "ShopScene";
     [SerializeField] private CreatureDataSO[] opponentMonsterPool;
 
@@ -24,6 +22,7 @@ public class BattleManager : MonoBehaviour
     private VisualElement _battleUiRoot;
     private Label _speedLabel;
     private int _roundReadyFrame;
+    private readonly List<CreatureController> _participants = new();
 
     public static RoundResult LastResult { get; private set; } = RoundResult.None;
 
@@ -123,6 +122,7 @@ public class BattleManager : MonoBehaviour
                 body.angularVelocity = Vector3.zero;
             }
             creature.SetRegistry(_creatureRegistry);
+            _participants.Add(creature);
         }
 
         _roundStarted = HasTeam(_creatureRegistry.playerCreatures) && HasTeam(_creatureRegistry.enemyCreatures);
@@ -144,9 +144,9 @@ public class BattleManager : MonoBehaviour
         // If both teams die during the same frame, count it as a loss.
         LastResult = playerAlive ? RoundResult.Win : RoundResult.Loss;
         _roundEnded = true;
-        Time.timeScale = 1f;
+        RunProgress.RecordResult(LastResult);
+        EndRound();
         ShowResult();
-        StartCoroutine(EndRound());
     }
 
     private void BuildBattleUi()
@@ -166,7 +166,7 @@ public class BattleManager : MonoBehaviour
         controls.Add(_speedLabel);
 
         Label roundLabel = ToolkitUi.Label(
-            $"Round {OpponentRoster.RoundNumber} · {_arena.ArenaName} · Enemy {OpponentRoster.Members.Count}/5 · Spent {OpponentRoster.LastSpent}/10",
+            $"Round {OpponentRoster.RoundNumber} · {_arena.ArenaName}\n{RunProgress.Summary}",
             14, new Color(0.72f, 0.79f, 0.87f));
         roundLabel.style.marginRight = 12;
         controls.Add(roundLabel);
@@ -200,9 +200,22 @@ public class BattleManager : MonoBehaviour
         root.style.backgroundColor = new Color(0f, 0f, 0f, 0.55f);
         root.style.justifyContent = Justify.Center;
         root.style.alignItems = Align.Center;
-        Label result = ToolkitUi.Label(LastResult == RoundResult.Win ? "Victory!" : "Defeat!",
-            56, Color.white, true);
-        root.Add(result);
+        string title = RunProgress.IsOver
+            ? (RunProgress.HasWon ? "You Won the Run!" : "Run Over")
+            : (LastResult == RoundResult.Win ? "Victory!" : "Defeat!");
+        PostMatchSummary.Show(root, title, _participants, ContinueToShop);
+    }
+
+    private void ContinueToShop()
+    {
+        if (!Application.CanStreamedLevelBeLoaded(shopSceneName))
+        {
+            Debug.LogError($"Shop scene '{shopSceneName}' is missing from Build Settings.", this);
+            return;
+        }
+        if (RunProgress.IsOver) RunProgress.StartNewRun();
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(shopSceneName);
     }
 
     private void OnDestroy()
@@ -210,25 +223,19 @@ public class BattleManager : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    private IEnumerator EndRound()
+    private void EndRound()
     {
-        foreach (CreatureController creature in FindObjectsByType<CreatureController>(FindObjectsSortMode.None))
+        Time.timeScale = 0f;
+        foreach (CreatureController creature in _participants)
         {
+            if (creature == null) continue;
+            StatsComponent stats = creature.GetComponent<StatsComponent>();
+            if (stats != null) stats.MatchFinished = true;
             creature.StopAllCoroutines();
             creature.enabled = false;
             MovementComponent movement = creature.GetComponent<MovementComponent>();
             if (movement != null) movement.enabled = false;
         }
-
-        yield return new WaitForSecondsRealtime(Mathf.Max(0f, resultDisplaySeconds));
-
-        if (!Application.CanStreamedLevelBeLoaded(shopSceneName))
-        {
-            Debug.LogError($"Shop scene '{shopSceneName}' is missing from Build Settings.", this);
-            yield break;
-        }
-
-        SceneManager.LoadScene(shopSceneName);
     }
 
     private static bool HasTeam(System.Collections.Generic.IReadOnlyList<CreatureController> creatures)

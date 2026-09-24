@@ -24,7 +24,7 @@ public class MoveScreenPage : MonoBehaviour
         header.Add(ToolkitUi.Button("Next Round", () => SceneManager.LoadScene(battleSceneName)));
 
         Label subtitle = ToolkitUi.Label(
-            "Move editing is coming later. These are the moves equipped for the next round.",
+            $"{RunProgress.Summary}\nMove editing is coming later. These are the moves equipped for the next round.",
             17, new Color(0.72f, 0.79f, 0.87f));
         subtitle.style.marginTop = 12;
         subtitle.style.marginBottom = 20;
@@ -50,6 +50,7 @@ public class MoveScreenPage : MonoBehaviour
             VisualElement identity = new VisualElement();
             identity.style.width = Length.Percent(35);
             identity.Add(ToolkitUi.Label($"{i + 1}. {creature.creatureName}", 22, Color.white, true));
+            identity.Add(ToolkitUi.Label(member.LevelSummary, 14, new Color(0.45f, 0.8f, 1f)));
             identity.Add(ToolkitUi.Label(
                 $"Ability: {(ability != null ? ability.DisplayName : "None")}",
                 16, new Color(0.72f, 0.79f, 0.87f)));

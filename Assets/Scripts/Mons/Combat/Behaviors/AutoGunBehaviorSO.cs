@@ -67,7 +67,7 @@ public class AutoGunBehaviorSO : AttackBehaviorSO
 
                 if (!blocked && firstCreature == victim)
                 {
-                    victim.GetComponent<StatsComponent>()?.TakeDamage(context.Damage);
+                    victim.GetComponent<StatsComponent>()?.TakeDamage(context.Damage, context.caster.GetComponent<CreatureController>());
                 }
 
                 tracer.SetPosition(0, origin);

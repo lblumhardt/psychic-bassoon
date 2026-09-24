@@ -29,6 +29,18 @@ public struct CreatureStats
             attackSpeed + RollDelta());
     }
 
+    // Each level adds 25% of the original stat (rounded up, minimum one).
+    public CreatureStats AtLevel(int level)
+    {
+        int upgrades = Mathf.Clamp(level, 1, 3) - 1;
+        return new CreatureStats(
+            hp + upgrades * Mathf.Max(1, Mathf.CeilToInt(hp * 0.25f)),
+            power + upgrades * Mathf.Max(1, Mathf.CeilToInt(power * 0.25f)),
+            defense + upgrades * Mathf.Max(1, Mathf.CeilToInt(defense * 0.25f)),
+            moveSpeed + upgrades * Mathf.Max(1, Mathf.CeilToInt(moveSpeed * 0.25f)),
+            attackSpeed + upgrades * Mathf.Max(1, Mathf.CeilToInt(attackSpeed * 0.25f)));
+    }
+
     private static int RollDelta()
     {
         int amount = UnityEngine.Random.Range(1, 3);

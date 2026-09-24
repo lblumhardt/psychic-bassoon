@@ -4,6 +4,7 @@ using UnityEngine;
 public class FireworkRocket : MonoBehaviour
 {
     private CreatureRegistry _registry;
+    private CreatureController _source;
     private Team _team;
     private Vector3 _start;
     private Vector3 _end;
@@ -16,9 +17,10 @@ public class FireworkRocket : MonoBehaviour
     private LineRenderer _trail;
     private Transform _rocketVisual;
 
-    public void Initialize(CreatureRegistry registry, Team team, Vector3 start, Vector3 end,
+    public void Initialize(CreatureController source, CreatureRegistry registry, Team team, Vector3 start, Vector3 end,
         float damage, float flightSeconds, float explosionRadius, float scatterRadius, float satelliteMultiplier)
     {
+        _source = source;
         _registry = registry;
         _team = team;
         _start = start;
@@ -82,7 +84,7 @@ public class FireworkRocket : MonoBehaviour
                 Vector3 delta = opponent.transform.position - position;
                 delta.y = 0f;
                 if (delta.sqrMagnitude <= _explosionRadius * _explosionRadius)
-                    opponent.GetComponent<StatsComponent>()?.TakeDamage(damage);
+                    opponent.GetComponent<StatsComponent>()?.TakeDamage(damage, _source);
             }
         }
 
