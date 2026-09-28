@@ -4,6 +4,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Mons/Attack Behaviors/Firework")]
 public class FireworkBehaviorSO : AttackBehaviorSO
 {
+    [SerializeField, Min(1f)] private float plusRadiusMultiplier = 1.5f;
+    public override string PlusDescription => $"{plusRadiusMultiplier:0.##}x explosion radius";
     [SerializeField] private float windupSeconds = 0.3f;
     [SerializeField] private float rocketFlightSeconds = 0.7f;
     [SerializeField] private float explosionRadius = 1.1f;
@@ -22,6 +24,6 @@ public class FireworkBehaviorSO : AttackBehaviorSO
             context.caster.position, context.target.position,
             context.Damage,
             rocketFlightSeconds / caster.ProjectileSpeedMultiplier,
-            explosionRadius, scatterRadius, satelliteDamageMultiplier);
+            explosionRadius * (context.isPlus ? plusRadiusMultiplier : 1f), scatterRadius, satelliteDamageMultiplier);
     }
 }

@@ -37,10 +37,11 @@ public static class RunRoster
         return sold;
     }
 
-    public static bool TryMerge(CreatureInstance donor, CreatureInstance receiver)
+    public static bool TryMerge(CreatureInstance donor, CreatureInstance receiver,
+        IReadOnlyList<AttackDataSO> selectedMoves = null)
     {
         if (!Creatures.Contains(donor) || !Creatures.Contains(receiver) ||
-            !receiver.TryMerge(donor)) return false;
+            !receiver.TryMerge(donor, selectedMoves)) return false;
         Creatures.Remove(donor);
         return true;
     }

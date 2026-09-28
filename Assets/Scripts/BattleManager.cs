@@ -22,6 +22,7 @@ public class BattleManager : MonoBehaviour
     private VisualElement _battleUiRoot;
     private Label _speedLabel;
     private int _roundReadyFrame;
+    private bool _perksReady;
     private readonly List<CreatureController> _participants = new();
 
     public static RoundResult LastResult { get; private set; } = RoundResult.None;
@@ -42,6 +43,12 @@ public class BattleManager : MonoBehaviour
     private void Start()
     {
         CreatureController[] creatures = FindObjectsByType<CreatureController>(FindObjectsSortMode.None);
+        if (SandboxSession.Active)
+        {
+            SpawnSandbox(creatures);
+        }
+        else
+        {
         CreatureController playerTemplate = null;
         CreatureController enemyTemplate = null;
         foreach (CreatureController creature in creatures)
@@ -62,7 +69,7 @@ public class BattleManager : MonoBehaviour
         {
             CreatureInstance starter = RunRoster.Members[0];
             playerTemplate.Configure(starter.Species, starter.EquippedMoves, starter.Ability,
-                starter.Stats, starter.HeldItem, starter.Spray);
+                starter.Stats, starter.HeldItem, starter.Spray, starter.Level);
             for (int i = 1; i < RunRoster.Members.Count; i++)
             {
                 int column = (i - 1) % 3;
@@ -74,7 +81,7 @@ public class BattleManager : MonoBehaviour
                 teammate.name = member.Species.creatureName;
                 teammate.GetComponent<CreatureController>().Configure(
                     member.Species, member.EquippedMoves, member.Ability, member.Stats,
-                    member.HeldItem, member.Spray);
+                    member.HeldItem, member.Spray, member.Level);
             }
         }
 
@@ -105,6 +112,7 @@ public class BattleManager : MonoBehaviour
             }
         }
 
+        }
         BuildBattleUi();
 
         creatures = FindObjectsByType<CreatureController>(FindObjectsSortMode.None);
@@ -137,6 +145,13 @@ public class BattleManager : MonoBehaviour
     {
         if (!_roundStarted || _roundEnded || Time.frameCount < _roundReadyFrame) return;
 
+        if (!_perksReady)
+        {
+            _perksReady = true;
+            _creatureRegistry.Perks = gameObject.AddComponent<BattlePerks>();
+            _creatureRegistry.Perks.Initialize(_participants, !SandboxSession.Active);
+        }
+
         bool playerAlive = HasLivingCreature(_creatureRegistry.playerCreatures);
         bool enemyAlive = HasLivingCreature(_creatureRegistry.enemyCreatures);
         if (playerAlive && enemyAlive) return;
@@ -144,7 +159,7 @@ public class BattleManager : MonoBehaviour
         // If both teams die during the same frame, count it as a loss.
         LastResult = playerAlive ? RoundResult.Win : RoundResult.Loss;
         _roundEnded = true;
-        RunProgress.RecordResult(LastResult);
+        if (!SandboxSession.Active) RunProgress.RecordResult(LastResult);
         EndRound();
         ShowResult();
     }
@@ -166,7 +181,7 @@ public class BattleManager : MonoBehaviour
         controls.Add(_speedLabel);
 
         Label roundLabel = ToolkitUi.Label(
-            $"Round {OpponentRoster.RoundNumber} · {_arena.ArenaName}\n{RunProgress.Summary}",
+            SandboxSession.Active ? $"Sandbox · {_arena.ArenaName}" : $"Round {OpponentRoster.RoundNumber} · {_arena.ArenaName}\n{RunProgress.Summary}",
             14, new Color(0.72f, 0.79f, 0.87f));
         roundLabel.style.marginRight = 12;
         controls.Add(roundLabel);
@@ -175,6 +190,11 @@ public class BattleManager : MonoBehaviour
         AddSpeedButton(controls, 2);
         AddSpeedButton(controls, 4);
         AddSpeedButton(controls, 8);
+        if (SandboxSession.Active)
+        {
+            controls.Add(ToolkitUi.Button("Edit Teams", ReturnToSandbox));
+            controls.Add(ToolkitUi.Button("Restart Test", () => SceneManager.LoadScene(SceneManager.GetActiveScene().name)));
+        }
     }
 
     private void AddSpeedButton(VisualElement controls, int multiplier)
@@ -200,10 +220,45 @@ public class BattleManager : MonoBehaviour
         root.style.backgroundColor = new Color(0f, 0f, 0f, 0.55f);
         root.style.justifyContent = Justify.Center;
         root.style.alignItems = Align.Center;
-        string title = RunProgress.IsOver
+        string title = !SandboxSession.Active && RunProgress.IsOver
             ? (RunProgress.HasWon ? "You Won the Run!" : "Run Over")
             : (LastResult == RoundResult.Win ? "Victory!" : "Defeat!");
-        PostMatchSummary.Show(root, title, _participants, ContinueToShop);
+        PostMatchSummary.Show(root, title, _participants, SandboxSession.Active ? ReturnToSandbox : ContinueToShop);
+        if (SandboxSession.Active)
+            root.Add(ToolkitUi.Button("Replay Test", () => SceneManager.LoadScene(SceneManager.GetActiveScene().name)));
+    }
+
+    private void ReturnToSandbox()
+    {
+        SandboxSession.Active = false;
+        SandboxSession.OpenEditor = true;
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    private void SpawnSandbox(CreatureController[] templates)
+    {
+        if (templates.Length == 0)
+        {
+            Debug.LogError("Sandbox battle requires a creature template in the battle scene.");
+            return;
+        }
+        foreach (var template in templates) template.gameObject.SetActive(false);
+        foreach (Team team in new[] { Team.Player, Team.Enemy })
+        {
+            var members = team == Team.Player ? SandboxSession.Player : SandboxSession.Enemy;
+            foreach (var member in members)
+            {
+                var clone = Instantiate(templates[0].gameObject, Vector3.zero, templates[0].transform.rotation);
+                clone.name = $"Sandbox {team} - {member.Species.creatureName}";
+                // Awake initializes component references when the inactive clone is activated.
+                clone.SetActive(true);
+                var controller = clone.GetComponent<CreatureController>();
+                controller.SetTeam(team);
+                member.Configure(controller);
+            }
+        }
+        foreach (var template in templates) Destroy(template.gameObject);
     }
 
     private void ContinueToShop()
@@ -250,7 +305,7 @@ public class BattleManager : MonoBehaviour
     private static void ConfigureCreature(CreatureController controller, CreatureInstance member)
     {
         controller.Configure(member.Species, member.EquippedMoves, member.Ability,
-            member.Stats, member.HeldItem, member.Spray);
+            member.Stats, member.HeldItem, member.Spray, member.Level);
     }
 
     private static bool HasLivingCreature(System.Collections.Generic.IReadOnlyList<CreatureController> creatures)

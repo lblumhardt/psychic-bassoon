@@ -13,6 +13,9 @@ public class StatsComponent : MonoBehaviour
     public event Action Died;
 
     public float HealthFraction => _maxHP > 0f ? Mathf.Clamp01(_currentHP / _maxHP) : 0f;
+    public float MaxHP => _maxHP;
+    public float Shield { get; private set; }
+    public float ShieldAbsorbed { get; private set; }
     public float CurrentHP => _currentHP;
     public float DamageDealt { get; private set; }
     public float DamageTaken { get; private set; }
@@ -27,12 +30,20 @@ public class StatsComponent : MonoBehaviour
         _deathReported = false;
         DamageDealt = DamageTaken = HealingDone = 0f;
         MatchFinished = false;
+        Shield = ShieldAbsorbed = 0f;
     }
 
     public float TakeDamage(float amount, CreatureController source = null)
     {
         if (MatchFinished || amount <= 0f || IsDead()) return 0f;
-        float mitigated = amount * (10f / (10f + _defense));
+        CreatureController owner = GetComponent<CreatureController>();
+        BattlePerks perks = owner != null && owner.Registry != null ? owner.Registry.Perks : null;
+        float defense = _defense + (perks != null ? perks.DefenseBonus(owner) : 0f);
+        float mitigated = amount * (10f / (10f + Mathf.Max(0f, defense)));
+        float absorbed = Mathf.Min(Shield, mitigated);
+        Shield -= absorbed;
+        ShieldAbsorbed += absorbed;
+        mitigated -= absorbed;
         float dealt = Mathf.Min(_currentHP, mitigated);
         _currentHP -= dealt;
         DamageTaken += dealt;
@@ -42,6 +53,7 @@ public class StatsComponent : MonoBehaviour
         if (_currentHP <= 0f && !_deathReported)
         {
             _deathReported = true;
+            if (perks != null) perks.Knockout(owner, source);
             Died?.Invoke();
         }
         return dealt;
@@ -54,8 +66,17 @@ public class StatsComponent : MonoBehaviour
         _currentHP += healed;
         StatsComponent sourceStats = source != null ? source.GetComponent<StatsComponent>() : null;
         if (sourceStats != null) sourceStats.HealingDone += healed;
+        CreatureController owner = GetComponent<CreatureController>();
+        if (owner != null && owner.Registry != null && owner.Registry.Perks != null)
+            owner.Registry.Perks.Overheal(owner, this, amount - healed);
         if (healed > 0f) Healed?.Invoke(healed);
         return healed;
+    }
+
+    public void AddShield(float amount, float cap)
+    {
+        if (MatchFinished || IsDead() || amount <= 0f) return;
+        Shield = Mathf.Max(Shield, Mathf.Min(cap, Shield + amount));
     }
 
     public bool IsDead() {

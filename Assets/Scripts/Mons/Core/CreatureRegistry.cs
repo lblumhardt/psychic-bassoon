@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class CreatureRegistry : MonoBehaviour
 {
+    public BattlePerks Perks { get; set; }
     public List<CreatureController> playerCreatures = new();
     public List<CreatureController> enemyCreatures = new();
 

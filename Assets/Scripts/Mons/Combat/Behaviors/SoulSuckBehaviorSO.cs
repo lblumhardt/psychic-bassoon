@@ -4,6 +4,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Mons/Attack Behaviors/Soul Suck")]
 public class SoulSuckBehaviorSO : AttackBehaviorSO
 {
+    [SerializeField, Range(0.5f, 1f)] private float plusHealingFraction = 0.75f;
+    public override string PlusDescription => $"Heal for {plusHealingFraction * 100f:0}% of HP damage dealt (normally 50%)";
     [SerializeField] private float windupSeconds = 0.3f;
     [SerializeField] private float beamSeconds = 0.45f;
 
@@ -22,7 +24,7 @@ public class SoulSuckBehaviorSO : AttackBehaviorSO
 
         float damage = context.Damage;
         float drained = victimStats.TakeDamage(damage, caster);
-        casterStats.Heal(drained * 0.5f, caster);
+        casterStats.Heal(drained * (context.isPlus ? plusHealingFraction : 0.5f), caster);
 
         GameObject beamObject = new GameObject("Soul Suck Beam");
         LineRenderer beam = beamObject.AddComponent<LineRenderer>();

@@ -92,7 +92,8 @@ public class PackedLunchPickup : MonoBehaviour
             if (stats == null) continue;
             if (ally)
             {
-                if (stats.Heal(_heal, _source) > 0f) return true;
+                float shieldBefore = stats.Shield;
+                if (stats.Heal(_heal, _source) > 0f || stats.Shield > shieldBefore) return true;
             }
             else
             {

@@ -5,6 +5,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Mons/Attack Behaviors/Packed Lunch")]
 public class PackedLunchBehaviorSO : AttackBehaviorSO
 {
+    [SerializeField, Min(1f)] private float plusHealingMultiplier = 1.5f;
+    public override string PlusDescription => $"{plusHealingMultiplier:0.##}x healing";
     [SerializeField] private float windupSeconds = 0.25f;
     [SerializeField] private float lobSeconds = 0.65f;
     [SerializeField] private float arcHeight = 1.3f;
@@ -48,7 +50,7 @@ public class PackedLunchBehaviorSO : AttackBehaviorSO
 
         GameObject lunch = new GameObject("Packed Lunch");
         lunch.AddComponent<PackedLunchPickup>().Initialize(caster, caster.Registry, caster.Team, start, end,
-            context.Damage, opponentDamage,
+            context.Damage * (context.isPlus ? plusHealingMultiplier : 1f), opponentDamage,
             lobSeconds / caster.ProjectileSpeedMultiplier,
             arcHeight, pickupLifetimeSeconds, pickupRadius);
     }

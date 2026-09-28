@@ -15,6 +15,7 @@ public class CreatureController : MonoBehaviour
     private CreatureRegistry _registry;
     private IReadOnlyList<AttackDataSO> _equippedMoves;
     private bool _initialized;
+    private int _level = 1;
     private bool _abilityAssigned;
     private CreatureAbilitySO _ability;
     private CreatureStats _runtimeStats;
@@ -28,7 +29,8 @@ public class CreatureController : MonoBehaviour
     public CreatureAbilitySO Ability => _ability;
     public CreatureStats Stats => _runtimeStats;
     public float PowerMultiplier => Mathf.Max(0.2f, _runtimeStats.power / 5f) * ItemMultiplier(i => i.damageMultiplier);
-    public float AttackSpeedMultiplier => Mathf.Max(0.2f, _runtimeStats.attackSpeed / 5f);
+    public float PerkSpeedMultiplier => _registry != null && _registry.Perks != null ? _registry.Perks.SpeedMultiplier(this) : 1f;
+    public float AttackSpeedMultiplier => Mathf.Max(0.2f, _runtimeStats.attackSpeed / 5f) * PerkSpeedMultiplier;
     public float MoveCooldownMultiplier => ItemMultiplier(i => i.moveCooldownMultiplier);
     public float ProjectileSpeedMultiplier =>
         (_ability != null ? _ability.GetProjectileSpeedMultiplier() : 1f) *
@@ -40,7 +42,7 @@ public class CreatureController : MonoBehaviour
             float statMultiplier = Mathf.Max(0.2f, _runtimeStats.moveSpeed / 5f);
             float abilityMultiplier = _ability != null
                 ? _ability.GetMoveSpeedMultiplier(Time.timeSinceLevelLoad) : 1f;
-            return statMultiplier * abilityMultiplier;
+            return statMultiplier * abilityMultiplier * PerkSpeedMultiplier;
         }
     }
 
@@ -84,8 +86,9 @@ public class CreatureController : MonoBehaviour
     }
 
     public void Configure(CreatureDataSO data, IReadOnlyList<AttackDataSO> moves,
-        CreatureAbilitySO ability, CreatureStats stats, CreatureItemSO heldItem, CreatureItemSO spray)
+        CreatureAbilitySO ability, CreatureStats stats, CreatureItemSO heldItem, CreatureItemSO spray, int level = 1)
     {
+        _level = Mathf.Clamp(level, 1, 3);
         creatureData = data;
         _equippedMoves = moves;
         _ability = ability;
@@ -127,7 +130,7 @@ public class CreatureController : MonoBehaviour
         statsComponent.Initialize(_runtimeStats);
         if (_equippedMoves != null)
         {
-            combatComponent.ConfigureMoves(_equippedMoves);
+            combatComponent.ConfigureMoves(_equippedMoves, _level);
             return;
         }
 
@@ -141,7 +144,7 @@ public class CreatureController : MonoBehaviour
                 if (defaults.Count == 2) break;
             }
         }
-        combatComponent.ConfigureMoves(defaults);
+        combatComponent.ConfigureMoves(defaults, _level);
     }
 
     private Color TeamOutlineColor()
@@ -164,6 +167,7 @@ public class CreatureController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (_registry != null && _registry.Perks == null) return;
         if (statsComponent.IsDead()) {
             return;
         }

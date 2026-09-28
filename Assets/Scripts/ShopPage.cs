@@ -14,8 +14,8 @@ public class ShopPage : MonoBehaviour
     [SerializeField] private CreatureDataSO startingCreature;
     [SerializeField] private CreatureDataSO[] monsterPool;
 
-    private readonly CreatureInstance[] _creatureOffers = new CreatureInstance[3];
-    private readonly CreatureItemSO[] _itemOffers = new CreatureItemSO[2];
+    private CreatureInstance[] _creatureOffers => RunShop.Creatures;
+    private CreatureItemSO[] _itemOffers => RunShop.Items;
     private CreatureItemSO[] _itemPool;
     private VisualElement _root;
     private int _money;
@@ -27,6 +27,7 @@ public class ShopPage : MonoBehaviour
         RunRoster.InitializeIfEmpty(startingCreature);
         _itemPool = Resources.LoadAll<CreatureItemSO>("Items");
         RollOffers();
+        RunPerks.PrepareDraft();
         _root = ToolkitUi.Attach(this, new Color(0.06f, 0.09f, 0.14f));
         _root.style.flexDirection = FlexDirection.Column;
         Render();
@@ -40,8 +41,11 @@ public class ShopPage : MonoBehaviour
                 if (creature != null) creatures.Add(creature);
 
         for (int i = 0; i < _creatureOffers.Length; i++)
+        {
+            if (RunShop.CreatureLocked[i] && _creatureOffers[i] != null) continue;
             _creatureOffers[i] = creatures.Count > 0
                 ? CreatureInstance.Generate(creatures[Random.Range(0, creatures.Count)]) : null;
+        }
 
         List<CreatureItemSO> items = new();
         if (_itemPool != null)
@@ -49,7 +53,11 @@ public class ShopPage : MonoBehaviour
                 if (item != null) items.Add(item);
 
         for (int i = 0; i < _itemOffers.Length; i++)
+            if (RunShop.ItemLocked[i] && _itemOffers[i] != null) items.Remove(_itemOffers[i]);
+
+        for (int i = 0; i < _itemOffers.Length; i++)
         {
+            if (RunShop.ItemLocked[i] && _itemOffers[i] != null) continue;
             if (items.Count == 0)
             {
                 _itemOffers[i] = null;
@@ -68,18 +76,23 @@ public class ShopPage : MonoBehaviour
         Color muted = new Color(0.72f, 0.79f, 0.87f);
         Color cardColor = new Color(0.12f, 0.17f, 0.24f);
 
+        ScrollView page = new();
+        page.style.flexGrow = 1;
+        page.style.minHeight = 0;
+        _root.Add(page);
+
         VisualElement top = new();
-        top.style.height = Length.Percent(52);
         top.style.paddingTop = 16;
         top.style.paddingBottom = 12;
         top.style.paddingLeft = 24;
         top.style.paddingRight = 24;
-        _root.Add(top);
+        page.Add(top);
 
         VisualElement header = new();
         header.style.flexDirection = FlexDirection.Row;
         header.style.justifyContent = Justify.SpaceBetween;
         header.style.alignItems = Align.Center;
+        header.style.flexWrap = Wrap.Wrap;
         header.style.marginBottom = 12;
         header.Add(ToolkitUi.Label("Monster Shop", 30, Color.white, true));
         string result = BattleManager.LastResult switch
@@ -114,6 +127,7 @@ public class ShopPage : MonoBehaviour
         VisualElement offers = new();
         offers.style.flexDirection = FlexDirection.Row;
         offers.style.flexGrow = 1;
+        offers.style.flexWrap = Wrap.Wrap;
         top.Add(offers);
         for (int i = 0; i < _creatureOffers.Length; i++) AddCreatureCard(offers, i, cardColor, muted);
         for (int i = 0; i < _itemOffers.Length; i++) AddItemCard(offers, i, cardColor, muted);
@@ -125,7 +139,7 @@ public class ShopPage : MonoBehaviour
         bottom.style.paddingRight = 24;
         bottom.style.paddingBottom = 16;
         bottom.style.backgroundColor = new Color(0.08f, 0.12f, 0.18f);
-        _root.Add(bottom);
+        page.Add(bottom);
 
         VisualElement rosterHeader = new();
         rosterHeader.style.flexDirection = FlexDirection.Row;
@@ -134,14 +148,18 @@ public class ShopPage : MonoBehaviour
         rosterHeader.style.marginBottom = 10;
         rosterHeader.Add(ToolkitUi.Label(
             $"Your Roster ({RunRoster.Members.Count}/{RunRoster.MaxMembers})", 26, Color.white, true));
-        rosterHeader.Add(ToolkitUi.Button("Configure Moves", () => SceneManager.LoadScene(moveSceneName)));
+        rosterHeader.Add(ToolkitUi.Button("Inspect Loadouts", () => SceneManager.LoadScene(moveSceneName)));
         bottom.Add(rosterHeader);
+        Label perks = ToolkitUi.Label(RunPerks.Summary, 13, muted);
+        perks.style.whiteSpace = WhiteSpace.Normal;
+        bottom.Add(perks);
 
-        ScrollView roster = new();
+        VisualElement roster = new();
         roster.style.flexGrow = 1;
         bottom.Add(roster);
         for (int i = 0; i < RunRoster.Members.Count; i++)
             AddRosterRow(roster, i, cardColor, muted);
+        PerkDraftUi.Show(_root, Render);
     }
 
     private void AddCreatureCard(VisualElement offers, int index, Color cardColor, Color muted)
@@ -155,7 +173,14 @@ public class ShopPage : MonoBehaviour
         }
 
         CreatureStats stats = offer.Stats;
-        card.Add(ToolkitUi.Label(offer.Species.creatureName, 20, Color.white, true));
+        VisualElement portrait = ToolkitUi.CreaturePortrait(offer.Species, 96);
+        portrait.style.alignSelf = Align.Center;
+        portrait.style.marginBottom = 10;
+        card.Add(portrait);
+        Label name = ToolkitUi.Label(offer.Species.creatureName, 20, Color.white, true);
+        name.style.whiteSpace = WhiteSpace.Normal;
+        card.Add(name);
+        card.Add(ToolkitUi.Label(offer.LevelSummary, 12, new Color(0.45f, 0.8f, 1f)));
         card.Add(ToolkitUi.Label(
             $"HP {stats.hp}  PWR {stats.power}\nDEF {stats.defense}  MOVE {stats.moveSpeed}\nATK SPD {stats.attackSpeed}",
             13, muted));
@@ -163,6 +188,8 @@ public class ShopPage : MonoBehaviour
             $"{MoveName(offer, 0)}\n{MoveName(offer, 1)}\n{(offer.Ability != null ? offer.Ability.DisplayName : "No ability")}",
             12, Color.white);
         loadout.style.marginTop = 6;
+        loadout.style.marginBottom = 10;
+        loadout.style.whiteSpace = WhiteSpace.Normal;
         loadout.style.flexGrow = 1;
         card.Add(loadout);
         Button buy = ToolkitUi.Button($"Buy Â· {CreaturePrice}", () => BuyCreature(index));
@@ -172,6 +199,7 @@ public class ShopPage : MonoBehaviour
         upgrade.style.marginTop = 4;
         upgrade.SetEnabled(_money >= CreaturePrice && HasMergeTarget(offer));
         card.Add(upgrade);
+        AddLockButton(card, index, false);
     }
 
     private void AddItemCard(VisualElement offers, int index, Color cardColor, Color muted)
@@ -198,13 +226,30 @@ public class ShopPage : MonoBehaviour
             () => SelectItem(index));
         buy.SetEnabled(_pendingItemIndex == index || _money >= item.price);
         card.Add(buy);
+        AddLockButton(card, index, true);
+    }
+
+    private void AddLockButton(VisualElement card, int index, bool item)
+    {
+        bool[] locks = item ? RunShop.ItemLocked : RunShop.CreatureLocked;
+        Button freeze = ToolkitUi.Button(locks[index] ? "Frozen · Unfreeze" : "Freeze", () =>
+        {
+            locks[index] = !locks[index];
+            Render();
+        });
+        freeze.tooltip = "Keep this offer through rerolls and future rounds until purchased or unfrozen.";
+        freeze.style.height = 30;
+        freeze.style.marginTop = 4;
+        card.Add(freeze);
     }
 
     private static VisualElement CreateOfferCard(VisualElement parent, int index, Color color)
     {
         VisualElement card = ToolkitUi.Panel(color);
         card.style.flexGrow = 1;
-        card.style.flexBasis = 0;
+        card.style.flexBasis = 200;
+        card.style.minWidth = 200;
+        card.style.marginBottom = 10;
         card.style.marginRight = index == 4 ? 0 : 10;
         parent.Add(card);
         return card;
@@ -217,21 +262,29 @@ public class ShopPage : MonoBehaviour
         row.style.flexDirection = FlexDirection.Row;
         row.style.alignItems = Align.Center;
         row.style.marginBottom = 8;
+        row.style.flexWrap = Wrap.Wrap;
         roster.Add(row);
+        VisualElement portrait = ToolkitUi.CreaturePortrait(member.Species, 72);
+        portrait.style.marginRight = 14;
+        row.Add(portrait);
 
         VisualElement identity = new();
         identity.style.flexGrow = 1;
+        identity.style.minWidth = 230;
+        identity.style.marginBottom = 6;
         identity.Add(ToolkitUi.Label($"{index + 1}. {member.Species.creatureName}", 19, Color.white, true));
         identity.Add(ToolkitUi.Label(member.LevelSummary, 13, new Color(0.45f, 0.8f, 1f)));
         identity.Add(ToolkitUi.Label(
             $"Held: {ItemName(member.HeldItem)}   Spray: {ItemName(member.Spray)}", 13, muted));
+        identity.Add(ToolkitUi.Label($"{MoveName(member, 0)} / {MoveName(member, 1)}", 13, Color.white));
         row.Add(identity);
 
         CreatureStats stats = member.Stats;
         Label statLabel = ToolkitUi.Label(
-            $"HP {stats.hp}   PWR {stats.power}   DEF {stats.defense}   MOVE {stats.moveSpeed}   ATK SPD {stats.attackSpeed}",
+            $"HP {stats.hp}   PWR {stats.power}   DEF {stats.defense}\nMOVE {stats.moveSpeed}   ATK SPD {stats.attackSpeed}",
             14, muted);
         statLabel.style.marginRight = 16;
+        statLabel.style.marginBottom = 6;
         row.Add(statLabel);
 
         Button merge = ToolkitUi.Button("Merge intoâ€¦", () => ShowMergeChoices(member, -1));
@@ -257,6 +310,7 @@ public class ShopPage : MonoBehaviour
             _money < CreaturePrice || !RunRoster.TryAdd(_creatureOffers[index])) return;
         _money -= CreaturePrice;
         _creatureOffers[index] = null;
+        RunShop.CreatureLocked[index] = false;
         _pendingItemIndex = -1;
         Render();
     }
@@ -284,12 +338,16 @@ public class ShopPage : MonoBehaviour
         panel.style.maxWidth = 950;
         panel.style.maxHeight = Length.Percent(90);
         overlay.Add(panel);
+        VisualElement donorPortrait = ToolkitUi.CreaturePortrait(donor.Species, 64);
+        donorPortrait.style.marginBottom = 8;
+        panel.Add(donorPortrait);
         panel.Add(ToolkitUi.Label($"Merge {donor.Species.creatureName} intoâ€¦", 25, Color.white, true));
         Label rules = ToolkitUi.Label(
             $"Consumes the selected {(shopIndex >= 0 ? "shop" : "roster")} creature" +
             (shopIndex >= 0 ? $" for {CreaturePrice} money. " : ". ") +
             $"Contributes {donor.CopyCount} {(donor.CopyCount == 1 ? "copy" : "copies")}.\n" +
-            "The receiving creature keeps its moves, ability, item, and spray.\n" +
+            "Choose moves from both creatures. The receiver keeps its ability, item, and spray.\n" +
+            "Level 2: choose one plus move. Level 3: both moves are plus.\n" +
             $"Discarded: held item {ItemName(donor.HeldItem)}; spray {ItemName(donor.Spray)}.\n" +
             "Level 2 needs 2 extra copies; level 3 needs 3 more. Each level adds 25% of original stats, rounded up.",
             15, new Color(0.8f, 0.86f, 0.94f));
@@ -308,6 +366,9 @@ public class ShopPage : MonoBehaviour
             VisualElement choice = ToolkitUi.Panel(new Color(0.12f, 0.17f, 0.24f));
             choice.style.marginBottom = 8;
             choices.Add(choice);
+            VisualElement receiverPortrait = ToolkitUi.CreaturePortrait(receiver.Species, 56);
+            receiverPortrait.style.marginBottom = 8;
+            choice.Add(receiverPortrait);
             choice.Add(ToolkitUi.Label($"{i + 1}. {receiver.Species.creatureName} Â· {receiver.LevelSummary}",
                 18, Color.white, true));
             choice.Add(ToolkitUi.Label($"After merge: {receiver.PreviewMergeProgress(donor)}", 15,
@@ -323,12 +384,69 @@ public class ShopPage : MonoBehaviour
             preview.style.whiteSpace = WhiteSpace.Normal;
             choice.Add(preview);
             int excess = receiver.CopyCount + donor.CopyCount - CreatureInstance.LevelThreeCopies;
-            if (excess > 0)
+            if (receiver.Level == CreatureInstance.MaxLevel)
+                choice.Add(ToolkitUi.Label("Max level: move changes only; no stat gain.", 14, new Color(1f, 0.8f, 0.35f)));
+            else if (excess > 0)
                 choice.Add(ToolkitUi.Label($"{excess} excess copies will be lost at max level.",
                     14, new Color(1f, 0.8f, 0.35f)));
-            Button confirm = ToolkitUi.Button(shopIndex >= 0 ? $"Upgrade this creature Â· {CreaturePrice}" : "Merge into this creature",
-                () => CompleteMerge(donor, receiver, shopIndex));
-            confirm.style.marginTop = 6;
+            List<AttackDataSO> available = receiver.MergeMoveChoices(donor);
+            int required = Mathf.Min(2, available.Count);
+            List<AttackDataSO> selected = available.GetRange(0, required);
+            int resultCopies = receiver.CopyCount + donor.CopyCount;
+            int plusSlots = resultCopies >= CreatureInstance.LevelThreeCopies ? 2 : resultCopies >= CreatureInstance.LevelTwoCopies ? 1 : 0;
+            Label plusPreview = ToolkitUi.Label("", 14, new Color(1f, 0.85f, 0.4f));
+            plusPreview.style.whiteSpace = WhiteSpace.Normal;
+            choice.Add(plusPreview);
+            Label selectionLabel = ToolkitUi.Label("", 15, Color.white, true);
+            choice.Add(selectionLabel);
+            Button confirm = ToolkitUi.Button(shopIndex >= 0 ? $"Confirm merge · {CreaturePrice}" : "Confirm merge",
+                () => CompleteMerge(donor, receiver, shopIndex, selected));
+            void UpdateSelection()
+            {
+                selectionLabel.text = $"Keep {required} distinct moves ({selected.Count}/{required} selected). Unselected moves are lost.";
+                confirm.SetEnabled(selected.Count == required);
+                List<string> previews = new();
+                for (int slot = 0; slot < selected.Count; slot++)
+                {
+                    bool plus = slot < plusSlots;
+                    previews.Add(selected[slot].attackName + (plus ? "+: " + selected[slot].behavior.PlusDescription : ""));
+                }
+                plusPreview.text = "After merge: " + string.Join(" / ", previews);
+            }
+            foreach (AttackDataSO move in available)
+            {
+                bool fromReceiver = false;
+                bool fromDonor = false;
+                foreach (AttackDataSO equipped in receiver.EquippedMoves) if (equipped == move) fromReceiver = true;
+                foreach (AttackDataSO equipped in donor.EquippedMoves) if (equipped == move) fromDonor = true;
+                string origin = fromReceiver && fromDonor ? "Both creatures" : fromReceiver ? "Receiver" : "Donor";
+                Toggle toggle = new Toggle($"{move.attackName} · {origin} · Base power {move.damage:0.#} · Cooldown {move.cooldown:0.#}s · Range {move.range:0.#}");
+                toggle.value = selected.Contains(move);
+                toggle.style.color = Color.white;
+                toggle.style.marginTop = 6;
+                toggle.RegisterValueChangedCallback(evt =>
+                {
+                    if (evt.newValue) { if (!selected.Contains(move)) selected.Add(move); }
+                    else selected.Remove(move);
+                    UpdateSelection();
+                });
+                choice.Add(toggle);
+                if (plusSlots == 1)
+                {
+                    Button makePlus = ToolkitUi.Button("Make " + move.attackName + " the plus move", () =>
+                    {
+                        if (!selected.Contains(move)) return;
+                        selected.Remove(move);
+                        selected.Insert(0, move);
+                        UpdateSelection();
+                    });
+                    makePlus.tooltip = "Select this move above, then make it the level-2 plus move.";
+                    makePlus.style.height = 28;
+                    choice.Add(makePlus);
+                }
+            }
+            UpdateSelection();
+            confirm.style.marginTop = 10;
             choice.Add(confirm);
         }
         Button cancel = ToolkitUi.Button("Cancel", () => overlay.RemoveFromHierarchy());
@@ -337,7 +455,7 @@ public class ShopPage : MonoBehaviour
         panel.Add(cancel);
     }
 
-    private void CompleteMerge(CreatureInstance donor, CreatureInstance receiver, int shopIndex)
+    private void CompleteMerge(CreatureInstance donor, CreatureInstance receiver, int shopIndex, IReadOnlyList<AttackDataSO> selectedMoves)
     {
         bool receiverInRoster = false;
         foreach (CreatureInstance member in RunRoster.Members)
@@ -346,11 +464,12 @@ public class ShopPage : MonoBehaviour
         if (shopIndex >= 0)
         {
             if (shopIndex >= _creatureOffers.Length || !ReferenceEquals(_creatureOffers[shopIndex], donor) ||
-                _money < CreaturePrice || !receiver.TryMerge(donor)) return;
+                _money < CreaturePrice || !receiver.TryMerge(donor, selectedMoves)) return;
             _money -= CreaturePrice;
             _creatureOffers[shopIndex] = null;
+            RunShop.CreatureLocked[shopIndex] = false;
         }
-        else if (!RunRoster.TryMerge(donor, receiver)) return;
+        else if (!RunRoster.TryMerge(donor, receiver, selectedMoves)) return;
         _pendingItemIndex = -1;
         Render();
     }
@@ -372,6 +491,7 @@ public class ShopPage : MonoBehaviour
         RunRoster.Members[creatureIndex].Equip(item);
         _money -= item.price;
         _itemOffers[_pendingItemIndex] = null;
+        RunShop.ItemLocked[_pendingItemIndex] = false;
         _pendingItemIndex = -1;
         Render();
     }
@@ -388,7 +508,7 @@ public class ShopPage : MonoBehaviour
     {
         if (creature == null || slot < 0 || slot >= creature.EquippedMoves.Count) return "Empty";
         AttackDataSO move = creature.EquippedMoves[slot];
-        return move != null ? move.attackName : "Empty";
+        return creature.MoveDisplayName(slot);
     }
 
     private static string ItemName(CreatureItemSO item) => item != null ? item.displayName : "None";

@@ -84,4 +84,32 @@ public static class ToolkitUi
         panel.style.borderBottomRightRadius = 8;
         return panel;
     }
+
+    public static VisualElement CreaturePortrait(CreatureDataSO creature, int size = 80)
+    {
+        VisualElement frame = new();
+        frame.style.width = frame.style.height = size;
+        frame.style.flexShrink = 0;
+        frame.style.backgroundColor = new Color(0.055f, 0.085f, 0.13f);
+        frame.style.borderTopLeftRadius = frame.style.borderTopRightRadius = 10;
+        frame.style.borderBottomLeftRadius = frame.style.borderBottomRightRadius = 10;
+        frame.style.alignItems = Align.Center;
+        frame.style.justifyContent = Justify.Center;
+        frame.tooltip = creature != null ? creature.creatureName : "Creature";
+        frame.pickingMode = PickingMode.Ignore;
+        if (creature != null && creature.creatureTexture != null)
+        {
+            Image image = new Image { image = creature.creatureTexture, scaleMode = ScaleMode.ScaleToFit };
+            image.style.width = image.style.height = size - 12;
+            image.pickingMode = PickingMode.Ignore;
+            frame.Add(image);
+        }
+        else
+        {
+            string initial = creature != null && !string.IsNullOrEmpty(creature.creatureName)
+                ? creature.creatureName.Substring(0, 1).ToUpperInvariant() : "?";
+            frame.Add(Label(initial, size / 3, new Color(0.45f, 0.8f, 1f), true));
+        }
+        return frame;
+    }
 }

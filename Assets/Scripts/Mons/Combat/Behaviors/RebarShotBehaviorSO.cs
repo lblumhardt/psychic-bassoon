@@ -4,6 +4,8 @@ using System.Collections;
 [CreateAssetMenu(menuName = "Mons/Attack Behaviors/Rebar Shot")]
 public class RebarShotBehaviorSO : AttackBehaviorSO
 {
+    [SerializeField, Min(1f)] private float plusSpeedMultiplier = 1.5f;
+    public override string PlusDescription => $"{plusSpeedMultiplier:0.##}x projectile speed";
     [SerializeField] private float castWindupSeconds = 1.0f;
     [SerializeField] private GameObject rebarProjectilePrefab;
     [SerializeField] private float projectileSpeed = 20f;
@@ -51,7 +53,7 @@ public class RebarShotBehaviorSO : AttackBehaviorSO
             // No max travel distance — lifetime and collisions are handled on RebarProjectile.
             CreatureController caster = context.caster.GetComponent<CreatureController>();
             float speedMultiplier = caster != null ? caster.ProjectileSpeedMultiplier : 1f;
-            projectile.Launch(context.caster, direction, projectileSpeed * speedMultiplier, maxDistance: 0f);
+            projectile.Launch(context.caster, direction, projectileSpeed * speedMultiplier * (context.isPlus ? plusSpeedMultiplier : 1f), maxDistance: 0f);
         }
     }
 }

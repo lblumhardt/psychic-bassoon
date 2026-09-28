@@ -1,0 +1,186 @@
+RADGE ROLL
+Dungeons & Dragons 5e - 2024 rules (5.5e)
+LEVEL 5 CHARACTER SHEET - DRAFT / CHOICES PENDING
+
+IDENTITY
+Name: Radge Roll
+Class: Warlock 5
+Subclass: Celestial Patron (gained at Warlock 3)
+Species: Human; creature type: Humanoid
+Background: Entertainer
+Size: Medium | Height: 6 feet | Speed: 30 feet
+Homeland: Land of Ice
+Affiliation: Crossbone Guild - a renegade group of defectors from other
+guilds, with more self-motivated members.
+Patron identity / pact story: [choose]
+Age, appearance, alignment, personality, bonds and goals: [optional details]
+Languages: Common + [choose two standard languages, subject to DM setting]
+XP / milestone progress: [not supplied]
+
+ABILITY SCORES - ORIGINAL ROLLS PRESERVED
+No background or level-4 bonuses have been applied.
+Human in the 2024 rules does not grant separate ability score increases.
+
+Strength:     10 (+0) | Background: [ ] | Level 4: [ ] | Final: [ ]
+Dexterity:    13 (+1) | Background: [ ] | Level 4: [ ] | Final: [ ]
+Constitution: 16 (+3) | Background: [ ] | Level 4: [ ] | Final: [ ]
+Intelligence: 11 (+0) | Background: [ ] | Level 4: [ ] | Final: [ ]
+Wisdom:       13 (+1) | Background: [ ] | Level 4: [ ] | Final: [ ]
+Charisma:     16 (+3) | Background: [ ] | Level 4: [ ] | Final: [ ]
+
+Entertainer bonuses: choose +2 to one and +1 to a different ability from
+Strength, Dexterity, Charisma; alternatively, +1 to each of those three.
+Suggested starting choice, NOT applied: +2 CHA and +1 DEX -> CHA 18, DEX 14.
+Level 4: choose Ability Score Improvement or another eligible feat.
+Ability Score Improvement allows +2 to one score or +1 to two, maximum 20.
+
+COMBAT - PROVISIONAL VALUES USING RAW SCORES ONLY
+Proficiency Bonus: +3
+Armor Class: 12 in leather armor (11 + Dexterity modifier)
+Initiative: +1
+Passive Perception: 11 (before additional skill/feat choices)
+Spell attack bonus: +6 (Charisma modifier + proficiency)
+Spell save DC: 14 (8 + Charisma modifier + proficiency)
+HP maximum: [PENDING - DO NOT ROLL AUTOMATICALLY]
+Current HP: [ ] | Temporary HP: [ ]
+Hit Dice: 5d8 maximum | Unspent: [ ]
+Death saves: successes [ ][ ][ ] | failures [ ][ ][ ]
+Heroic Inspiration: [ ]
+
+HP WORKSHEET - DM'S ROLLING METHOD
+Requested formula: Base + 4 x CON modifier + four d8 rolls.
+Normally, Base means level-1 HP: 8 + CON modifier for a Warlock.
+Confirm that this is what the DM means by Base before finalizing HP.
+Keep all rolls, including ones. No rerolls on ones.
+Level 2 d8: [ ] | Level 3 d8: [ ] | Level 4 d8: [ ] | Level 5 d8: [ ]
+Roll sum: [ ] | Final CON modifier: [ ] | Confirmed Base: [ ]
+Any feat-based HP bonus: [pending feat choices]
+Wait until ability scores and feats are settled, then ask the player to roll.
+
+SAVING THROWS - PROVISIONAL
+Strength +0 | Dexterity +1 | Constitution +3
+Intelligence +0 | Wisdom +4 (proficient) | Charisma +6 (proficient)
+
+SKILLS - PROVISIONAL; * MEANS CONFIRMED PROFICIENCY
+Acrobatics (DEX):     +4 * Entertainer
+Animal Handling (WIS): +1
+Arcana (INT):         +3 * Warlock
+Athletics (STR):      +0
+Deception (CHA):      +3
+History (INT):        +0
+Insight (WIS):        +1
+Intimidation (CHA):   +3
+Investigation (INT):  +3 * Warlock
+Medicine (WIS):       +1
+Nature (INT):         +0
+Perception (WIS):     +1
+Performance (CHA):    +6 * Entertainer
+Persuasion (CHA):     +3
+Religion (INT):       +0
+Sleight of Hand (DEX): +1
+Stealth (DEX):        +1
+Survival (WIS):       +1
+Human Skillful skill: [choose; not yet included above]
+Extra skill/tool proficiencies from feats or invocations: [pending]
+
+PROFICIENCIES AND EQUIPMENT
+Armor training: Light armor
+Weapon proficiency: Simple weapons
+Instrument proficiency from Entertainer: [choose one]
+Instrument proficiencies from Musician: [choose three additional instruments]
+Proficiency does not automatically give ownership of an instrument.
+
+Confirmed class equipment from your notes:
+- Leather armor
+- Sickle
+- 2 daggers
+- Arcane focus (orb)
+- Book of occult lore
+- Scholar's pack
+- 15 GP (class starting money; current balance not confirmed)
+
+Entertainer equipment - not selected or added yet:
+A: The background instrument, 2 costumes, mirror, perfume,
+   traveler's clothes, and 11 GP.
+B: 50 GP instead of that background equipment package.
+Any campaign-specific level-5 gear, treasure or purchases: [confirm]
+
+Weapon attacks, before choices alter scores or abilities:
+- Dagger: +4 to hit; 1d4+1 piercing; melee or thrown (20/60 feet).
+- Sickle: +3 to hit; 1d4 slashing; melee.
+
+HUMAN FEATURES
+Resourceful: Gain Heroic Inspiration after each Long Rest.
+Skillful: One extra skill proficiency, still to choose.
+Versatile: One Origin feat, still to choose. Skilled is a suggestion,
+not an automatic selection. This is separate from background Musician.
+
+ENTERTAINER / MUSICIAN
+Background skills: Acrobatics and Performance.
+Musician grants proficiency with three chosen musical instruments.
+Encouraging Song: At the end of a Short or Long Rest, play an instrument
+you are proficient with to give Heroic Inspiration to up to three allies
+who hear the performance (your current Proficiency Bonus is +3).
+
+WARLOCK FEATURES AND SPELLCASTING
+Eldritch Invocations: 5 choices at this level; all pending.
+  1. [ ]  2. [ ]  3. [ ]  4. [ ]  5. [ ]
+Selection history: one at level 1, two more at level 2, two more at level 5.
+Check prerequisites and any replacements as we build through those levels.
+Pact of the Blade, Chain and Tome are invocation choices in 2024.
+
+Pact Magic: Charisma spellcasting; orb is your arcane focus.
+Spell slots: two level-3 slots. Available: [ ][ ]
+Both slots return after a Short or Long Rest.
+Magical Cunning: A one-minute rite restores one expended Pact Magic slot
+at this level; usable once per Long Rest. Available: [ ]
+
+Warlock cantrips: three choices, not yet selected.
+  1. [ ]  2. [ ]  3. [ ]
+Warlock prepared spells: six choices of spell levels 1-3, not selected.
+  1. [ ]  2. [ ]  3. [ ]  4. [ ]  5. [ ]  6. [ ]
+Track acquisition/replacements during level progression. These are not a
+Cleric-style list freely reselected every Long Rest.
+
+CELESTIAL PATRON - ACTIVE AT LEVEL 5
+Additional always-prepared spells:
+- Cantrips: Light, Sacred Flame
+- Spell level 1: Cure Wounds, Guiding Bolt
+- Spell level 2: Aid, Lesser Restoration
+- Spell level 3: Daylight, Revivify
+These are additional to your three chosen cantrips and six chosen spells.
+Before other feats/invocations, that means five cantrips and twelve
+prepared spells of level 1 or higher once all choices are complete.
+Being always prepared does not make a leveled spell free to cast.
+
+Healing Light: Six d6s in your pool. Remaining: [ ][ ][ ][ ][ ][ ]
+As a Bonus Action, heal yourself or one creature you can see within
+60 feet by spending dice and restoring HP equal to their total.
+Per-use limit: your CHA modifier (minimum one die); currently 3 dice
+before ability bonuses. All expended dice return after a Long Rest.
+Radiant Soul arrives at level 6; it is not active yet.
+
+PENDING CHOICES - WORK THROUGH IN ORDER
+1. Entertainer ability bonuses.
+2. Human extra skill and Origin feat, including any choices that feat grants.
+3. Four instrument proficiencies and background equipment option.
+4. Two additional standard languages; personal/patron details as desired.
+5. Level 1-3 invocation and spell choices, with Celestial at level 3.
+6. Level 4 feat or Ability Score Improvement; extra cantrip and spell.
+7. Level 5 invocation/spell choices and permitted replacements.
+8. Ask player for four d8 HP rolls, then calculate final HP and update
+   every ability-dependent value. Confirm the DM's meaning of Base.
+
+RULE REFERENCES (2024; plus player-provided notes)
+Character creation, background bonuses and languages:
+https://www.dndbeyond.com/sources/dnd/br-2024/creating-a-character
+Human:
+https://www.dndbeyond.com/sources/dnd/br-2024/character-origins
+Warlock:
+https://www.dndbeyond.com/sources/dnd/br-2024/character-classes
+Feats:
+https://www.dndbeyond.com/sources/dnd/br-2024/feats
+Entertainer (2024 Player's Handbook):
+https://roll20.net/compendium/dnd5e/Backgrounds:Entertainer?expansion=32231
+Celestial Patron (2024 Player's Handbook):
+https://roll20.net/compendium/dnd5e/Subclasses:Celestial%20Patron?expansion=32231

@@ -9,16 +9,22 @@ public class CombatComponent : MonoBehaviour
 
     private readonly Dictionary<AttackDataSO, float> _moveReadyTimes = new();
     private float _nextGlobalAttackTime;
+    private readonly HashSet<AttackDataSO> _plusMoves = new();
 
-    public void ConfigureMoves(IReadOnlyList<AttackDataSO> moves)
+    public void ConfigureMoves(IReadOnlyList<AttackDataSO> moves, int level = 1)
     {
         attacks = new List<AttackDataSO>(2);
         _moveReadyTimes.Clear();
+        _plusMoves.Clear();
         _nextGlobalAttackTime = 0f;
         if (moves == null) return;
         for (int i = 0; i < moves.Count && i < 2; i++)
         {
-            if (moves[i] != null && moves[i].behavior != null) attacks.Add(moves[i]);
+            if (moves[i] != null && moves[i].behavior != null)
+            {
+                attacks.Add(moves[i]);
+                if (i < Mathf.Clamp(level, 1, 3) - 1) _plusMoves.Add(moves[i]);
+            }
         }
     }
 
@@ -43,6 +49,7 @@ public class CombatComponent : MonoBehaviour
             caster = transform,
             target = target,
             combatComponent = this,
+            isPlus = _plusMoves.Contains(selectedAttack),
             attackData = selectedAttack
         };
 

@@ -5,6 +5,8 @@ using UnityEngine;
 public class AutoGunBehaviorSO : AttackBehaviorSO
 {
     private static Material _tracerMaterial;
+    [SerializeField, Min(1)] private int plusExtraShots = 4;
+    public override string PlusDescription => $"{plusExtraShots} extra shots per burst";
     [SerializeField, Min(1)] private int shotsPerBurst = 8;
     [SerializeField, Min(0.01f)] private float secondsBetweenShots = 0.12f;
     [SerializeField] private float muzzleHeight = 0.5f;
@@ -33,7 +35,8 @@ public class AutoGunBehaviorSO : AttackBehaviorSO
         if (_tracerMaterial != null) tracer.sharedMaterial = _tracerMaterial;
         tracer.enabled = false;
 
-        for (int shot = 0; shot < shotsPerBurst && !shooter.IsDead; shot++)
+        int shotCount = shotsPerBurst + (context.isPlus ? plusExtraShots : 0);
+        for (int shot = 0; shot < shotCount && !shooter.IsDead; shot++)
         {
             Transform target = targeting.GetTarget();
             if (target == null) break;
@@ -75,7 +78,7 @@ public class AutoGunBehaviorSO : AttackBehaviorSO
                 tracer.enabled = true;
             }
 
-            if (shot < shotsPerBurst - 1)
+            if (shot < shotCount - 1)
             {
                 yield return new WaitForSeconds(secondsBetweenShots);
                 tracer.enabled = false;

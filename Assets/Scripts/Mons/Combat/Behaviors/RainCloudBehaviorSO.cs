@@ -4,6 +4,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Mons/Attack Behaviors/Rain Cloud")]
 public class RainCloudBehaviorSO : AttackBehaviorSO
 {
+    [SerializeField, Min(1f)] private float plusLifetimeMultiplier = 1.5f;
+    public override string PlusDescription => $"{plusLifetimeMultiplier:0.##}x cloud lifetime";
     [SerializeField] private float windupSeconds = 0.4f;
     [SerializeField] private float lifetimeSeconds = 3f;
     [SerializeField] private float travelSpeed = 3.5f;
@@ -29,7 +31,7 @@ public class RainCloudBehaviorSO : AttackBehaviorSO
         cloud.transform.position = context.caster.position + direction * 1.5f;
         cloud.AddComponent<RainCloudZone>().Initialize(caster,
             context.Damage, direction,
-            Mathf.Max(0.1f, lifetimeSeconds),
+            Mathf.Max(0.1f, lifetimeSeconds) * (context.isPlus ? plusLifetimeMultiplier : 1f),
             Mathf.Max(0f, travelSpeed) * caster.ProjectileSpeedMultiplier,
             Mathf.Max(0.1f, rainRadius), Mathf.Max(0.05f, damageIntervalSeconds), cloudHeight);
     }

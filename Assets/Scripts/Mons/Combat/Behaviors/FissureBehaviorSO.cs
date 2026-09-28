@@ -4,6 +4,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Mons/Attack Behaviors/Fissure")]
 public class FissureBehaviorSO : AttackBehaviorSO
 {
+    [SerializeField, Min(1f)] private float plusSizeMultiplier = 1.4f;
+    public override string PlusDescription => $"{plusSizeMultiplier:0.##}x length and width";
     [SerializeField] private float windupSeconds = 0.35f;
     [SerializeField] private float length = 9f;
     [SerializeField] private float width = 0.85f;
@@ -38,7 +40,7 @@ public class FissureBehaviorSO : AttackBehaviorSO
         GameObject zone = new GameObject("Fissure");
         zone.transform.position = start;
         zone.AddComponent<FissureZone>().Initialize(caster, context.Damage,
-            direction, Mathf.Max(0.1f, length), Mathf.Max(0.05f, width), zigzagOffset,
+            direction, Mathf.Max(0.1f, length) * (context.isPlus ? plusSizeMultiplier : 1f), Mathf.Max(0.05f, width) * (context.isPlus ? plusSizeMultiplier : 1f), zigzagOffset,
             Mathf.Max(1, segments), Mathf.Max(0.1f, lifetimeSeconds), slowMultiplier, slowRefreshSeconds);
     }
 }

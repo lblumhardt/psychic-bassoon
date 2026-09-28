@@ -4,6 +4,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Mons/Attack Behaviors/Fruit Toss")]
 public class FruitTossBehaviorSO : AttackBehaviorSO
 {
+    [SerializeField, Min(1f)] private float plusDamageMultiplier = 1.5f;
+    public override string PlusDescription => $"{plusDamageMultiplier:0.##}x impact damage";
     [SerializeField] private float windupSeconds = 0.2f;
     [SerializeField] private float flightSeconds = 0.65f;
     [SerializeField] private float screenArcHeight = 1.6f;
@@ -19,7 +21,7 @@ public class FruitTossBehaviorSO : AttackBehaviorSO
         GameObject apple = new GameObject("Fruit Toss Apple");
         apple.AddComponent<FruitProjectile>().Initialize(caster, caster.Registry, caster.Team,
             context.caster.position, context.target.position,
-            context.Damage,
+            context.Damage * (context.isPlus ? plusDamageMultiplier : 1f),
             Mathf.Max(0.05f, flightSeconds / caster.ProjectileSpeedMultiplier),
             screenArcHeight, Mathf.Max(0.1f, impactRadius));
     }

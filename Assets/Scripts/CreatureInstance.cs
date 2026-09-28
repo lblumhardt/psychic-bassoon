@@ -22,6 +22,11 @@ public class CreatureInstance
     public CreatureDataSO Species => species;
     public IReadOnlyList<AttackDataSO> EquippedMoves => equippedMoves;
     public CreatureAbilitySO Ability => ability;
+    public bool IsMovePlus(int slot) => slot >= 0 && slot < equippedMoves.Length &&
+        equippedMoves[slot] != null && slot < Level - 1;
+    public string MoveDisplayName(int slot) => slot < 0 || slot >= equippedMoves.Length || equippedMoves[slot] == null
+        ? "Empty" : equippedMoves[slot].attackName + (IsMovePlus(slot) ? "+" : "");
+
     public int CopyCount => 1 + mergedCopies;
     public int Level => CopyCount >= LevelThreeCopies ? 3 : CopyCount >= LevelTwoCopies ? 2 : 1;
     public bool IsConsumed => consumed;
@@ -56,7 +61,17 @@ public class CreatureInstance
 
     public bool CanMerge(CreatureInstance donor) =>
         !consumed && donor != null && !donor.consumed && !ReferenceEquals(this, donor) &&
-        species != null && species == donor.species && Level < MaxLevel;
+        species != null && species == donor.species;
+
+    public List<AttackDataSO> MergeMoveChoices(CreatureInstance donor)
+    {
+        List<AttackDataSO> choices = new();
+        if (!CanMerge(donor)) return choices;
+        foreach (CreatureInstance creature in new[] { this, donor })
+            foreach (AttackDataSO move in creature.equippedMoves)
+                if (move != null && move.behavior != null && !choices.Contains(move)) choices.Add(move);
+        return choices;
+    }
 
     public string PreviewMergeProgress(CreatureInstance donor) =>
         CanMerge(donor) ? ProgressSummary(CopyCount + donor.CopyCount) : LevelSummary;
@@ -64,9 +79,23 @@ public class CreatureInstance
     public CreatureStats PreviewMergeStats(CreatureInstance donor) =>
         StatsAtCopies(CanMerge(donor) ? CopyCount + donor.CopyCount : CopyCount);
 
-    public bool TryMerge(CreatureInstance donor)
+    public bool TryMerge(CreatureInstance donor, IReadOnlyList<AttackDataSO> selectedMoves = null)
     {
         if (!CanMerge(donor)) return false;
+        List<AttackDataSO> choices = MergeMoveChoices(donor);
+        int required = Mathf.Min(2, choices.Count);
+        // Legacy callers keep the receiver's moves, filling empty slots from the donor.
+        if (selectedMoves == null) selectedMoves = choices.GetRange(0, required);
+        if (selectedMoves.Count != required) return false;
+        AttackDataSO[] newMoves = new AttackDataSO[2];
+        for (int i = 0; i < selectedMoves.Count; i++)
+        {
+            AttackDataSO move = selectedMoves[i];
+            if (!choices.Contains(move) || (i > 0 && newMoves[0] == move)) return false;
+            newMoves[i] = move;
+        }
+        // Validate the entire selection before consuming a copy or changing progression.
+        equippedMoves = newMoves;
         mergedCopies = Mathf.Min(LevelThreeCopies, CopyCount + donor.CopyCount) - 1;
         donor.heldItem = null;
         donor.spray = null;

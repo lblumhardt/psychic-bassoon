@@ -8,6 +8,15 @@ public class MainMenuPage : MonoBehaviour
 
     private void Start()
     {
+        if (SandboxSession.OpenEditor) ShowSandbox();
+        else ShowMenu();
+    }
+
+    private void ShowSandbox() => SandboxPage.Show(this, ShowMenu);
+
+    private void ShowMenu()
+    {
+        SandboxSession.Active = false;
         VisualElement root = ToolkitUi.Attach(this, new Color(0.06f, 0.09f, 0.14f));
         root.style.justifyContent = Justify.Center;
         root.style.alignItems = Align.Center;
@@ -25,6 +34,11 @@ public class MainMenuPage : MonoBehaviour
         start.style.width = 240;
         start.style.height = 54;
         root.Add(start);
+        Button sandbox = ToolkitUi.Button("Sandbox / Debug", ShowSandbox);
+        sandbox.style.width = 240;
+        sandbox.style.height = 54;
+        sandbox.style.marginTop = 12;
+        root.Add(sandbox);
     }
 
     private void StartRun()

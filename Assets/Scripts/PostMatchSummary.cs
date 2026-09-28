@@ -20,7 +20,7 @@ public static class PostMatchSummary
         Color resultColor = BattleManager.LastResult == RoundResult.Win
             ? new Color(0.45f, 0.95f, 0.65f) : new Color(1f, 0.55f, 0.48f);
         panel.Add(ToolkitUi.Label(result, 32, resultColor, true));
-        panel.Add(ToolkitUi.Label($"Round {OpponentRoster.RoundNumber} · {RunProgress.Summary}",
+        panel.Add(ToolkitUi.Label(SandboxSession.Active ? "Sandbox test · Run progress unchanged" : $"Round {OpponentRoster.RoundNumber} · {RunProgress.Summary}",
             18, Color.white));
         Label explanation = ToolkitUi.Label("Actual damage after defense; overkill and excess healing excluded.",
             14, new Color(0.72f, 0.79f, 0.87f));
@@ -36,7 +36,7 @@ public static class PostMatchSummary
         AddTeam(scroll, participants, Team.Player, "Your team", new Color(0.4f, 0.75f, 1f));
         AddTeam(scroll, participants, Team.Enemy, "Opponent", new Color(1f, 0.55f, 0.48f));
 
-        Button next = ToolkitUi.Button(RunProgress.IsOver ? "Start New Run" : "Continue to Shop", continueToShop);
+        Button next = ToolkitUi.Button(SandboxSession.Active ? "Edit Sandbox Teams" : RunProgress.IsOver ? "Start New Run" : "Continue to Shop", continueToShop);
         next.style.marginTop = 16;
         next.style.flexShrink = 0;
         panel.Add(next);

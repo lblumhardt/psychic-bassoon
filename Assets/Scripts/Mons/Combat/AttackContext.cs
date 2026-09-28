@@ -6,6 +6,7 @@ public struct AttackContext
     public Transform target;
     public CombatComponent combatComponent;
     public AttackDataSO attackData;
+    public bool isPlus;
 
     public float Damage
     {

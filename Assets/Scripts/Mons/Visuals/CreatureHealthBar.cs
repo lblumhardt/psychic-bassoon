@@ -11,6 +11,7 @@ public class CreatureHealthBar : MonoBehaviour
     private StatsComponent _stats;
     private RectTransform _canvasTransform;
     private RawImage _fill;
+    private RawImage _shield;
     private Camera _camera;
     private Renderer[] _creatureRenderers;
 
@@ -89,6 +90,15 @@ public class CreatureHealthBar : MonoBehaviour
             _canvasTransform.rotation = Quaternion.LookRotation(-_camera.transform.forward, _camera.transform.up);
         }
 
+        if (_shield == null)
+        {
+            Transform existing = _canvasTransform.Find("Shield");
+            _shield = existing != null ? existing.GetComponent<RawImage>() : CreateImage("Shield", _canvasTransform, new Color(0.35f, 0.8f, 1f));
+            _shield.rectTransform.anchorMin = new Vector2(0f, 1.1f);
+            _shield.rectTransform.offsetMin = _shield.rectTransform.offsetMax = Vector2.zero;
+        }
+        _shield.rectTransform.anchorMax = new Vector2(Mathf.Clamp01(_stats.Shield / _stats.MaxHP), 1.5f);
+        _shield.enabled = _stats.Shield > 0f;
         _fill.rectTransform.anchorMax = new Vector2(_stats.HealthFraction, 1f);
         _fill.enabled = _stats.HealthFraction > 0f;
     }

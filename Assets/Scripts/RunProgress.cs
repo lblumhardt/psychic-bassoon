@@ -18,6 +18,8 @@ public static class RunProgress
         Losses = 0;
         RunRoster.Reset();
         OpponentRoster.Reset();
+        RunShop.Reset();
+        RunPerks.Reset();
         BattleManager.ResetResult();
     }
 
