@@ -10,6 +10,7 @@ public class CombatComponent : MonoBehaviour
     private readonly Dictionary<AttackDataSO, float> _moveReadyTimes = new();
     private float _nextGlobalAttackTime;
     private readonly HashSet<AttackDataSO> _plusMoves = new();
+    public bool IsPlusMove(AttackDataSO move) => move != null && _plusMoves.Contains(move);
 
     public void ConfigureMoves(IReadOnlyList<AttackDataSO> moves, int level = 1)
     {

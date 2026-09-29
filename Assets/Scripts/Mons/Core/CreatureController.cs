@@ -27,6 +27,9 @@ public class CreatureController : MonoBehaviour
     public bool IsDead => statsComponent != null && statsComponent.IsDead();
     public CreatureRegistry Registry => _registry;
     public CreatureAbilitySO Ability => _ability;
+    public int Level => _level;
+    public CreatureItemSO HeldItem => _heldItem;
+    public CreatureItemSO Spray => _spray;
     public CreatureStats Stats => _runtimeStats;
     public float PowerMultiplier => Mathf.Max(0.2f, _runtimeStats.power / 5f) * ItemMultiplier(i => i.damageMultiplier);
     public float PerkSpeedMultiplier => _registry != null && _registry.Perks != null ? _registry.Perks.SpeedMultiplier(this) : 1f;

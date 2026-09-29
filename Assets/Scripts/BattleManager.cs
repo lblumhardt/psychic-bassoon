@@ -113,7 +113,6 @@ public class BattleManager : MonoBehaviour
         }
 
         }
-        BuildBattleUi();
 
         creatures = FindObjectsByType<CreatureController>(FindObjectsSortMode.None);
         int playerSpawnIndex = 0;
@@ -139,6 +138,9 @@ public class BattleManager : MonoBehaviour
         {
             Debug.LogWarning("Battle needs at least one player and one enemy creature to start.", this);
         }
+        // Wait until all creature Start methods have initialized their fallback loadouts.
+        _battleUiRoot = ToolkitUi.Attach(this, Color.clear);
+        _battleUiRoot.schedule.Execute(BuildBattleUi);
     }
 
     private void Update()
@@ -166,12 +168,17 @@ public class BattleManager : MonoBehaviour
 
     private void BuildBattleUi()
     {
-        _battleUiRoot = ToolkitUi.Attach(this, Color.clear);
+        if (_roundEnded) return;
+        _battleUiRoot.style.paddingTop = 16;
+        _battleUiRoot.style.paddingBottom = 16;
+        _battleUiRoot.style.paddingLeft = 16;
+        _battleUiRoot.style.paddingRight = 16;
 
         VisualElement controls = ToolkitUi.Panel(new Color(0.05f, 0.08f, 0.12f, 0.9f));
-        controls.style.position = Position.Absolute;
-        controls.style.top = 16;
-        controls.style.right = 16;
+        controls.style.alignSelf = Align.FlexEnd;
+        controls.style.flexShrink = 0;
+        controls.style.maxWidth = Length.Percent(100);
+        controls.style.flexWrap = Wrap.Wrap;
         controls.style.flexDirection = FlexDirection.Row;
         controls.style.alignItems = Align.Center;
         _battleUiRoot.Add(controls);
@@ -195,6 +202,109 @@ public class BattleManager : MonoBehaviour
             controls.Add(ToolkitUi.Button("Edit Teams", ReturnToSandbox));
             controls.Add(ToolkitUi.Button("Restart Test", () => SceneManager.LoadScene(SceneManager.GetActiveScene().name)));
         }
+        VisualElement rosters = new VisualElement();
+        rosters.style.flexDirection = FlexDirection.Row;
+        rosters.style.justifyContent = Justify.SpaceBetween;
+        rosters.style.flexGrow = 1;
+        rosters.style.minHeight = 0;
+        rosters.style.marginTop = 12;
+        rosters.pickingMode = PickingMode.Ignore;
+        _battleUiRoot.Add(rosters);
+        AddTeamRoster(rosters, Team.Player, "Your team", new Color(0.35f, 0.75f, 1f));
+        AddTeamRoster(rosters, Team.Enemy, "Opponent team", new Color(1f, 0.45f, 0.4f));
+    }
+
+    private void AddTeamRoster(VisualElement parent, Team team, string title, Color color)
+    {
+        VisualElement panel = ToolkitUi.Panel(new Color(0.05f, 0.08f, 0.12f, 0.94f));
+        panel.style.width = Length.Percent(24);
+        panel.style.maxWidth = 320;
+        panel.style.minHeight = 0;
+        parent.Add(panel);
+        int count = _participants.FindAll(c => c != null && c.Team == team).Count;
+        panel.Add(ToolkitUi.Label($"{title} · {count}", 18, color, true));
+        VisualElement viewport = new VisualElement();
+        viewport.style.flexGrow = 1;
+        viewport.style.minHeight = 0;
+        panel.Add(viewport);
+        // Lay out compact cards at a known size, then fit the entire roster to
+        // the available space. Resizing the game view never hides a teammate.
+        const float rosterWidth = 280f;
+        float rosterHeight = Mathf.Max(1, count) * 124f;
+        VisualElement roster = new VisualElement();
+        roster.style.position = Position.Absolute;
+        roster.style.width = rosterWidth;
+        roster.style.height = rosterHeight;
+        roster.style.transformOrigin = new TransformOrigin(0, 0, 0);
+        viewport.Add(roster);
+        viewport.RegisterCallback<GeometryChangedEvent>(evt =>
+        {
+            float scale = Mathf.Max(0.01f, Mathf.Min(1f,
+                evt.newRect.width / rosterWidth, evt.newRect.height / rosterHeight));
+            roster.style.scale = new Scale(new Vector3(scale, scale, 1));
+            roster.style.left = Mathf.Max(0, (evt.newRect.width - rosterWidth * scale) / 2);
+        });
+        foreach (CreatureController creature in _participants)
+        {
+            if (creature == null || creature.Team != team) continue;
+            VisualElement card = ToolkitUi.Panel(new Color(0.12f, 0.17f, 0.24f));
+            card.style.marginTop = 4;
+            card.style.height = 120;
+            card.style.paddingTop = card.style.paddingBottom = 4;
+            card.style.paddingLeft = card.style.paddingRight = 6;
+            card.style.flexShrink = 0;
+            roster.Add(card);
+            VisualElement heading = new VisualElement();
+            heading.style.flexDirection = FlexDirection.Row;
+            heading.style.alignItems = Align.Center;
+            card.Add(heading);
+            heading.Add(ToolkitUi.CreaturePortrait(creature.creatureData, 32));
+            Label name = ToolkitUi.Label($"{creature.creatureData?.creatureName ?? "Creature"} · Lv {creature.Level}", 14, color, true);
+            name.style.overflow = Overflow.Hidden;
+            name.style.textOverflow = TextOverflow.Ellipsis;
+            name.tooltip = name.text;
+            name.style.flexShrink = 1;
+            name.style.marginLeft = 6;
+            Label health = ToolkitUi.Label("", 13, Color.white);
+            VisualElement identity = new VisualElement();
+            identity.style.flexGrow = 1;
+            identity.style.minWidth = 0;
+            heading.Add(identity);
+            identity.Add(name);
+            identity.Add(health);
+            CombatComponent combat = creature.GetComponent<CombatComponent>();
+            List<string> moves = new List<string>();
+            if (combat != null && combat.attacks != null)
+                foreach (AttackDataSO move in combat.attacks)
+                    if (move != null) moves.Add(move.attackName + (combat.IsPlusMove(move) ? "+" : ""));
+            AddRosterDetail(card, "Moves", moves.Count > 0 ? string.Join(" / ", moves) : "None");
+            AddRosterDetail(card, "Ability", creature.Ability != null ? creature.Ability.DisplayName : "None");
+            AddRosterDetail(card, "Item", creature.HeldItem != null ? creature.HeldItem.displayName : "None", creature.HeldItem?.description);
+            AddRosterDetail(card, "Spray", creature.Spray != null ? creature.Spray.displayName : "None", creature.Spray?.description);
+            StatsComponent stats = creature.GetComponent<StatsComponent>();
+            void RefreshHealth()
+            {
+                bool knockedOut = creature == null || creature.IsDead;
+                health.text = knockedOut ? "Knocked out" : stats != null
+                    ? $"HP {Mathf.CeilToInt(stats.CurrentHP)} / {Mathf.CeilToInt(stats.MaxHP)}" : "HP unavailable";
+                card.style.opacity = knockedOut ? 0.55f : 1f;
+            }
+            RefreshHealth();
+            card.schedule.Execute(RefreshHealth).Every(100);
+        }
+        if (count == 0) roster.Add(ToolkitUi.Label("No creatures", 14, Color.white));
+    }
+
+    private static void AddRosterDetail(VisualElement card, string title, string value, string tooltip = null)
+    {
+        Label label = ToolkitUi.Label($"{title}: {value}", 13, new Color(0.82f, 0.87f, 0.94f));
+        label.style.whiteSpace = WhiteSpace.NoWrap;
+        label.style.overflow = Overflow.Hidden;
+        label.style.textOverflow = TextOverflow.Ellipsis;
+        label.style.height = 18;
+        label.style.marginTop = label.style.marginBottom = 0;
+        label.tooltip = string.IsNullOrEmpty(tooltip) ? value : $"{value}\n{tooltip}";
+        card.Add(label);
     }
 
     private void AddSpeedButton(VisualElement controls, int multiplier)
