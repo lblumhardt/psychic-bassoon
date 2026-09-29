@@ -192,6 +192,7 @@ public class ShopPage : MonoBehaviour
         loadout.style.whiteSpace = WhiteSpace.Normal;
         loadout.style.flexGrow = 1;
         card.Add(loadout);
+        ToolkitUi.AbilityTooltip(loadout, () => offer.Ability);
         Button buy = ToolkitUi.Button($"Buy · {CreaturePrice}", () => BuyCreature(index));
         buy.SetEnabled(_money >= CreaturePrice && RunRoster.Members.Count < RunRoster.MaxMembers);
         card.Add(buy);
@@ -383,6 +384,7 @@ public class ShopPage : MonoBehaviour
                 (receiver.Ability != null ? receiver.Ability.DisplayName : "No ability"), 14, Color.white);
             preview.style.whiteSpace = WhiteSpace.Normal;
             choice.Add(preview);
+            ToolkitUi.AbilityTooltip(preview, () => receiver.Ability);
             int excess = receiver.CopyCount + donor.CopyCount - CreatureInstance.LevelThreeCopies;
             if (receiver.Level == CreatureInstance.MaxLevel)
                 choice.Add(ToolkitUi.Label("Max level: move changes only; no stat gain.", 14, new Color(1f, 0.8f, 0.35f)));

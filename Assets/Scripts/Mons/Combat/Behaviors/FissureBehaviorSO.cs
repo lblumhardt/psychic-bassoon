@@ -37,6 +37,11 @@ public class FissureBehaviorSO : AttackBehaviorSO
         else
             start.y -= 0.45f;
 
+        // The decorative floor has no collider and sits above the physics
+        // ground. Clear it and its spawn markings instead of drawing below it.
+        ArenaGenerator arena = FindFirstObjectByType<ArenaGenerator>();
+        if (arena != null) start.y = Mathf.Max(start.y, arena.FloorSurfaceY + 0.08f);
+
         GameObject zone = new GameObject("Fissure");
         zone.transform.position = start;
         zone.AddComponent<FissureZone>().Initialize(caster, context.Damage,

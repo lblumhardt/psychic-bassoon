@@ -142,7 +142,7 @@ public class CreatureController : MonoBehaviour
         {
             foreach (AttackDataSO attack in creatureData.movePool)
             {
-                if (attack == null || attack.behavior == null) continue;
+                if (attack == null || attack.behavior == null || attack.DebugOnly) continue;
                 defaults.Add(attack);
                 if (defaults.Count == 2) break;
             }

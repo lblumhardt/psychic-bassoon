@@ -23,7 +23,6 @@ MonoBehaviour:
   movePool:
   - {fileID: 11400000, guid: c810699d6a01432eaba676f3262074e9, type: 2}
   - {fileID: 11400000, guid: 597ff417c351456ab43d0e83263f55d6, type: 2}
-  - {fileID: 11400000, guid: e6f81c6a1f7744d588f2f96d3a8cc759, type: 2}
   - {fileID: 11400000, guid: 742a297fb00a483f84f1aa41a609fe55, type: 2}
   potentialAbilities:
   - {fileID: 11400000, guid: b5f879419905448b9baf431a7fb23bf2, type: 2}

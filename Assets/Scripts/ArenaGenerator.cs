@@ -17,6 +17,7 @@ public class ArenaGenerator : MonoBehaviour
 
     public int ArenaIndex { get; private set; }
     public string ArenaName { get; private set; }
+    public float FloorSurfaceY { get; private set; }
 
     public void GenerateRandomArena()
     {
@@ -231,6 +232,7 @@ public class ArenaGenerator : MonoBehaviour
         floor.transform.SetParent(_generatedRoot, false);
         floor.transform.position = new Vector3(0f, -0.07f, 0f);
         floor.transform.localScale = new Vector3(30f, 0.1f, 18f);
+        FloorSurfaceY = floor.GetComponent<Renderer>().bounds.max.y;
         Collider floorCollider = floor.GetComponent<Collider>();
         if (floorCollider != null) Destroy(floorCollider);
         floor.GetComponent<Renderer>().sharedMaterial = FloorMaterial();

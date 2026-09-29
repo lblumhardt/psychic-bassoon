@@ -4,6 +4,7 @@ using UnityEngine;
 public class NiceArmAbilitySO : CreatureAbilitySO
 {
     [SerializeField, Min(1f)] private float projectileSpeedMultiplier = 1.5f;
+    public override string Description => $"Projectiles travel {GetProjectileSpeedMultiplier():0.##}x as fast.";
 
     public override float GetProjectileSpeedMultiplier()
     {

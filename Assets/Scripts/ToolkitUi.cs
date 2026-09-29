@@ -6,6 +6,47 @@ public static class ToolkitUi
     private static PanelSettings _panelSettings;
     private static Font _font;
 
+    public static void AbilityTooltip(VisualElement target, System.Func<CreatureAbilitySO> getAbility)
+    {
+        VisualElement popup = null;
+        void Hide()
+        {
+            popup?.RemoveFromHierarchy();
+            popup = null;
+        }
+        target.RegisterCallback<PointerEnterEvent>(evt =>
+        {
+            Hide();
+            CreatureAbilitySO ability = getAbility();
+            if (ability == null || target.panel == null) return;
+            VisualElement root = target.panel.visualTree;
+            popup = Panel(new Color(0.025f, 0.04f, 0.065f, 0.98f));
+            popup.pickingMode = PickingMode.Ignore;
+            popup.style.position = Position.Absolute;
+            float width = Mathf.Min(300f, root.worldBound.width - 16f);
+            popup.style.width = width;
+            Label heading = Label(ability.DisplayName, 16, Color.white, true);
+            Label description = Label(ability.Description, 14, new Color(0.82f, 0.9f, 1f));
+            heading.style.whiteSpace = description.style.whiteSpace = WhiteSpace.Normal;
+            heading.pickingMode = description.pickingMode = PickingMode.Ignore;
+            popup.Add(heading);
+            popup.Add(description);
+            Vector2 position = root.WorldToLocal(evt.position);
+            popup.style.left = Mathf.Clamp(position.x + 14f, 8f, Mathf.Max(8f, root.worldBound.width - width - 8f));
+            popup.style.top = position.y + 18f;
+            popup.RegisterCallback<GeometryChangedEvent>(_ =>
+            {
+                if (popup != null)
+                    popup.style.top = Mathf.Clamp(position.y + 18f, 8f,
+                        Mathf.Max(8f, root.worldBound.height - popup.resolvedStyle.height - 8f));
+            });
+            root.Add(popup);
+        });
+        target.RegisterCallback<PointerLeaveEvent>(_ => Hide());
+        target.RegisterCallback<PointerDownEvent>(_ => Hide());
+        target.RegisterCallback<DetachFromPanelEvent>(_ => Hide());
+    }
+
     public static VisualElement Attach(MonoBehaviour host, Color background)
     {
         if (_panelSettings == null)

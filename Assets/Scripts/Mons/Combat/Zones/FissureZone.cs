@@ -26,6 +26,10 @@ public class FissureZone : MonoBehaviour
         }
 
         LineRenderer line = gameObject.AddComponent<LineRenderer>();
+        // Keep the whole ribbon on the ground plane; a camera-facing ribbon
+        // tilts its lower edge through the floor, especially for Fissure+.
+        transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+        line.alignment = LineAlignment.TransformZ;
         line.useWorldSpace = true;
         line.positionCount = _points.Count;
         line.SetPositions(_points.ToArray());

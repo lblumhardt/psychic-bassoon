@@ -33,7 +33,7 @@ public class SandboxCreature
         Species = species;
         BaseStats = species.baseStats;
         Ability = species.potentialAbilities?.FirstOrDefault(a => a != null);
-        var defaults = species.movePool?.Where(m => m != null).Take(2).ToArray();
+        var defaults = species.movePool?.Where(m => m != null && !m.DebugOnly).Take(2).ToArray();
         if (defaults != null) System.Array.Copy(defaults, Moves, defaults.Length);
     }
 

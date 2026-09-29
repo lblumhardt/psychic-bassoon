@@ -13,7 +13,7 @@ public class AutoGunBehaviorSO : AttackBehaviorSO
 
     public override IEnumerator Execute(AttackContext context)
     {
-        if (context.caster == null || context.attackData == null) yield break;
+        if (!SandboxSession.Active || context.caster == null || context.attackData == null) yield break;
 
         CreatureController shooter = context.caster.GetComponent<CreatureController>();
         TargetingComponent targeting = context.caster.GetComponent<TargetingComponent>();

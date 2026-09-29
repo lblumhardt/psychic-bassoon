@@ -62,9 +62,11 @@ public class MoveScreenPage : MonoBehaviour
             identity.style.marginBottom = 10;
             identity.Add(ToolkitUi.Label($"{i + 1}. {creature.creatureName}", 22, Color.white, true));
             identity.Add(ToolkitUi.Label(member.LevelSummary, 14, new Color(0.45f, 0.8f, 1f)));
-            identity.Add(ToolkitUi.Label(
+            Label abilityLabel = ToolkitUi.Label(
                 $"Ability: {(ability != null ? ability.DisplayName : "None")}",
-                16, new Color(0.72f, 0.79f, 0.87f)));
+                16, new Color(0.72f, 0.79f, 0.87f));
+            ToolkitUi.AbilityTooltip(abilityLabel, () => ability);
+            identity.Add(abilityLabel);
             identity.Add(ToolkitUi.Label(
                 $"Held: {(member.HeldItem != null ? member.HeldItem.displayName : "None")}  " +
                 $"Spray: {(member.Spray != null ? member.Spray.displayName : "None")}",
@@ -87,7 +89,7 @@ public class MoveScreenPage : MonoBehaviour
                 AttackDataSO move = moves[slot];
                 Label moveLabel = ToolkitUi.Label(
                     $"Move {slot + 1}: {member.MoveDisplayName(slot)}" +
-                    (move != null ? $"\nBase power {move.damage:0.#} · Cooldown {move.cooldown:0.#}s · Range {move.range:0.#}" : ""),
+                    (move != null ? $"\nBase power {move.damage:0.#} Â· Cooldown {move.cooldown:0.#}s Â· Range {move.range:0.#}" : ""),
                     18, Color.white);
                 if (member.IsMovePlus(slot) && move.behavior != null)
                     moveLabel.text += "\nPlus: " + move.behavior.PlusDescription;

@@ -12,4 +12,5 @@ public class AttackDataSO : ScriptableObject
     public float range;
     public float duration = 0.25f;
     public AttackBehaviorSO behavior;
+    public bool DebugOnly => behavior is AutoGunBehaviorSO;
 }

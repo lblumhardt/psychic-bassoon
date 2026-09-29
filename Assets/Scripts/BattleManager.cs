@@ -278,7 +278,8 @@ public class BattleManager : MonoBehaviour
                 foreach (AttackDataSO move in combat.attacks)
                     if (move != null) moves.Add(move.attackName + (combat.IsPlusMove(move) ? "+" : ""));
             AddRosterDetail(card, "Moves", moves.Count > 0 ? string.Join(" / ", moves) : "None");
-            AddRosterDetail(card, "Ability", creature.Ability != null ? creature.Ability.DisplayName : "None");
+            Label abilityLabel = AddRosterDetail(card, "Ability", creature.Ability != null ? creature.Ability.DisplayName : "None");
+            ToolkitUi.AbilityTooltip(abilityLabel, () => creature != null ? creature.Ability : null);
             AddRosterDetail(card, "Item", creature.HeldItem != null ? creature.HeldItem.displayName : "None", creature.HeldItem?.description);
             AddRosterDetail(card, "Spray", creature.Spray != null ? creature.Spray.displayName : "None", creature.Spray?.description);
             StatsComponent stats = creature.GetComponent<StatsComponent>();
@@ -295,7 +296,7 @@ public class BattleManager : MonoBehaviour
         if (count == 0) roster.Add(ToolkitUi.Label("No creatures", 14, Color.white));
     }
 
-    private static void AddRosterDetail(VisualElement card, string title, string value, string tooltip = null)
+    private static Label AddRosterDetail(VisualElement card, string title, string value, string tooltip = null)
     {
         Label label = ToolkitUi.Label($"{title}: {value}", 13, new Color(0.82f, 0.87f, 0.94f));
         label.style.whiteSpace = WhiteSpace.NoWrap;
@@ -305,6 +306,7 @@ public class BattleManager : MonoBehaviour
         label.style.marginTop = label.style.marginBottom = 0;
         label.tooltip = string.IsNullOrEmpty(tooltip) ? value : $"{value}\n{tooltip}";
         card.Add(label);
+        return label;
     }
 
     private void AddSpeedButton(VisualElement controls, int multiplier)

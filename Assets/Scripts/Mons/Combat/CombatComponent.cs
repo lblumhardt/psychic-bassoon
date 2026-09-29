@@ -21,7 +21,8 @@ public class CombatComponent : MonoBehaviour
         if (moves == null) return;
         for (int i = 0; i < moves.Count && i < 2; i++)
         {
-            if (moves[i] != null && moves[i].behavior != null)
+            if (moves[i] != null && moves[i].behavior != null &&
+                (!moves[i].DebugOnly || SandboxSession.Active))
             {
                 attacks.Add(moves[i]);
                 if (i < Mathf.Clamp(level, 1, 3) - 1) _plusMoves.Add(moves[i]);

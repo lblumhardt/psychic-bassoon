@@ -69,7 +69,7 @@ public class CreatureInstance
         if (!CanMerge(donor)) return choices;
         foreach (CreatureInstance creature in new[] { this, donor })
             foreach (AttackDataSO move in creature.equippedMoves)
-                if (move != null && move.behavior != null && !choices.Contains(move)) choices.Add(move);
+                if (move != null && move.behavior != null && !move.DebugOnly && !choices.Contains(move)) choices.Add(move);
         return choices;
     }
 
@@ -127,7 +127,7 @@ public class CreatureInstance
         {
             foreach (AttackDataSO move in species.movePool)
             {
-                if (move != null && move.behavior != null && !choices.Contains(move)) choices.Add(move);
+                if (move != null && move.behavior != null && !move.DebugOnly && !choices.Contains(move)) choices.Add(move);
             }
         }
 

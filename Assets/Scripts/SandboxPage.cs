@@ -121,7 +121,7 @@ public static class SandboxPage
                 var row = new VisualElement();
                 row.style.flexDirection = FlexDirection.Row;
                 if (native) row.style.backgroundColor = new Color(0.12f, 0.32f, 0.23f);
-                var label = ToolkitUi.Label(move.attackName + (native ? " · IN POOL" : "") + (move.behavior == null ? " · No behavior" : ""), 14,
+                var label = ToolkitUi.Label(move.attackName + (move.DebugOnly ? " · DEBUG ONLY" : native ? " · IN POOL" : "") + (move.behavior == null ? " · No behavior" : ""), 14,
                     native ? new Color(0.5f, 1f, 0.65f) : Color.white);
                 label.style.flexGrow = 1;
                 label.style.flexBasis = 0;
@@ -163,6 +163,9 @@ public static class SandboxPage
         if (allowNone) options.Insert(0, null);
         var labels = options.Select((v, i) => v == null ? "None" : $"{label(v)} [{i + 1}]").ToList();
         var field = new DropdownField(title, labels, Mathf.Max(0, options.IndexOf(selected)));
+        if (typeof(CreatureAbilitySO).IsAssignableFrom(typeof(T)))
+            ToolkitUi.AbilityTooltip(field, () => field.index >= 0 && field.index < options.Count
+                ? options[field.index] as CreatureAbilitySO : null);
         field.RegisterValueChangedCallback(e => { if (field.index >= 0) changed(options[field.index]); });
         parent.Add(field);
     }

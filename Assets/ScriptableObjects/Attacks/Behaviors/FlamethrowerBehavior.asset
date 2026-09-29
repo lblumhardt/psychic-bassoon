@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67d613ae1f6a4e6bbecf66297b6ec98f, type: 3}
+  m_Name: FlamethrowerBehavior
+  m_EditorClassIdentifier: Assembly-CSharp::FlamethrowerBehaviorSO
+  fireSprite: {fileID: 0}
+  spriteSize: 0.9
+  flameCount: 12
+  secondsBetweenFlames: 0.075
+  straightHoldSeconds: 0.45
+  waveSeconds: 1.1
+  fadeSeconds: 0.2
+  waveAmplitude: 1.2
+  waveFrequency: 2
+  hitRadius: 0.45
+  damageInterval: 0.3
+  groundFireCount: 3
+  groundFireSeconds: 3
+  groundFireRadius: 0.7
+  groundDamageMultiplier: 0.5
+  plusGroundLifetimeMultiplier: 1.5
