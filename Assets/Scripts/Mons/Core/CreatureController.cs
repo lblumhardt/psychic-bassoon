@@ -27,13 +27,14 @@ public class CreatureController : MonoBehaviour
     public bool IsDead => statsComponent != null && statsComponent.IsDead();
     public CreatureRegistry Registry => _registry;
     public CreatureAbilitySO Ability => _ability;
+    public CreatureAbilityRuntime AbilityRuntime { get; private set; }
     public int Level => _level;
     public CreatureItemSO HeldItem => _heldItem;
     public CreatureItemSO Spray => _spray;
     public CreatureStats Stats => _runtimeStats;
     public float PowerMultiplier => Mathf.Max(0.2f, _runtimeStats.power / 5f) * ItemMultiplier(i => i.damageMultiplier);
     public float PerkSpeedMultiplier => _registry != null && _registry.Perks != null ? _registry.Perks.SpeedMultiplier(this) : 1f;
-    public float AttackSpeedMultiplier => Mathf.Max(0.2f, _runtimeStats.attackSpeed / 5f) * PerkSpeedMultiplier;
+    public float AttackSpeedMultiplier => Mathf.Max(0.2f, _runtimeStats.attackSpeed / 5f) * PerkSpeedMultiplier * (AbilityRuntime?.AttackSpeedMultiplier ?? 1f);
     public float MoveCooldownMultiplier => ItemMultiplier(i => i.moveCooldownMultiplier);
     public float ProjectileSpeedMultiplier =>
         (_ability != null ? _ability.GetProjectileSpeedMultiplier() : 1f) *
@@ -45,7 +46,7 @@ public class CreatureController : MonoBehaviour
             float statMultiplier = Mathf.Max(0.2f, _runtimeStats.moveSpeed / 5f);
             float abilityMultiplier = _ability != null
                 ? _ability.GetMoveSpeedMultiplier(Time.timeSinceLevelLoad) : 1f;
-            return statMultiplier * abilityMultiplier * PerkSpeedMultiplier;
+            return statMultiplier * abilityMultiplier * PerkSpeedMultiplier * (AbilityRuntime?.MovementMultiplier ?? 1f);
         }
     }
 
@@ -131,6 +132,7 @@ public class CreatureController : MonoBehaviour
             visuals.SetTeamOutline(TeamOutlineColor());
         }
         statsComponent.Initialize(_runtimeStats);
+        AbilityRuntime = new CreatureAbilityRuntime(this);
         if (_equippedMoves != null)
         {
             combatComponent.ConfigureMoves(_equippedMoves, _level);

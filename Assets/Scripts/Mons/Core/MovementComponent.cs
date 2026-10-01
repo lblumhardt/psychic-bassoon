@@ -16,6 +16,7 @@ public class MovementComponent : MonoBehaviour
     private Vector3 _knockbackVelocityXZ;
     private float _slowMultiplier = 1f;
     private float _slowUntil;
+    public bool IsSlowed => Time.time < _slowUntil && _slowMultiplier < 1f;
 
     private void Awake()
     {

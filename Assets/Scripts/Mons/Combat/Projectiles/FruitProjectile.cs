@@ -64,7 +64,8 @@ public class FruitProjectile : MonoBehaviour
                 Vector3 delta = opponent.transform.position - _end;
                 delta.y = 0f;
                 if (delta.sqrMagnitude <= _impactRadius * _impactRadius)
-                    opponent.GetComponent<StatsComponent>()?.TakeDamage(_damage, _source);
+                    opponent.GetComponent<StatsComponent>()?.TakeDamage(_damage, _source,
+                        DamageKind.Normal, Vector3.Distance(_start, _end));
             }
         }
         Destroy(gameObject);

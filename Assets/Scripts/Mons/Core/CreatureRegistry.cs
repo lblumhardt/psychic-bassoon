@@ -37,4 +37,15 @@ public class CreatureRegistry : MonoBehaviour
         return team == Team.Player ? enemyCreatures : playerCreatures;
     }
 
+    public IReadOnlyList<CreatureController> GetAllies(Team team) =>
+        team == Team.Player ? playerCreatures : enemyCreatures;
+
+    public void NotifyKnockout(CreatureController victim, CreatureController source)
+    {
+        var participants = new List<CreatureController>(playerCreatures);
+        participants.AddRange(enemyCreatures);
+        foreach (var creature in participants)
+            if (creature != null) creature.AbilityRuntime?.OnKnockout(victim, source);
+    }
+
 }

@@ -33,6 +33,18 @@ MonoBehaviour:
   abilities:
   - {fileID: 11400000, guid: 857233f78b5e4b2883829dcdb168b514, type: 2}
   - {fileID: 11400000, guid: b5f879419905448b9baf431a7fb23bf2, type: 2}
+  - {fileID: 11400000, guid: 8c26e430656342d28f64768bb73032df, type: 2}
+  - {fileID: 11400000, guid: 3a8fef0121164671b5fed79d9c5eb5a8, type: 2}
+  - {fileID: 11400000, guid: 516d5c204120424a842b2020c7fe56cf, type: 2}
+  - {fileID: 11400000, guid: 1026370d75214277863f4bb12d6842ea, type: 2}
+  - {fileID: 11400000, guid: 177cec314acb41468120acf100027723, type: 2}
+  - {fileID: 11400000, guid: 20b09169fadc4ddd9cbbcd9aa2104f7f, type: 2}
+  - {fileID: 11400000, guid: 60df18846fa64639a62987c1072aa398, type: 2}
+  - {fileID: 11400000, guid: 0ae6fdf7cd0b494ba282f9c2e50ff3b1, type: 2}
+  - {fileID: 11400000, guid: c4ac10ae7049452ebcbe486540e16ba4, type: 2}
+  - {fileID: 11400000, guid: 12a9b9d5379049e0b9f3678f15283a16, type: 2}
+  - {fileID: 11400000, guid: d53f0ecd89b647c28c67a01c2ba68958, type: 2}
+  - {fileID: 11400000, guid: a1c6810224dc45e995a7fc15c8b9659e, type: 2}
   items:
   - {fileID: 11400000, guid: a1000000000000000000000000000009, type: 2}
   - {fileID: 11400000, guid: a1000000000000000000000000000001, type: 2}

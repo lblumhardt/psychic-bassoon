@@ -33,12 +33,16 @@ public class StatsComponent : MonoBehaviour
         Shield = ShieldAbsorbed = 0f;
     }
 
-    public float TakeDamage(float amount, CreatureController source = null)
+    public float TakeDamage(float amount, CreatureController source = null,
+        DamageKind kind = DamageKind.Normal, float projectileDistance = 0f)
     {
         if (MatchFinished || amount <= 0f || IsDead()) return 0f;
         CreatureController owner = GetComponent<CreatureController>();
+        amount *= source?.AbilityRuntime?.OutgoingMultiplier(owner, projectileDistance) ?? 1f;
+        amount *= owner?.AbilityRuntime?.IncomingMultiplier(kind) ?? 1f;
+        if (amount <= 0f) return 0f;
         BattlePerks perks = owner != null && owner.Registry != null ? owner.Registry.Perks : null;
-        float defense = _defense + (perks != null ? perks.DefenseBonus(owner) : 0f);
+        float defense = _defense + (perks != null ? perks.DefenseBonus(owner) : 0f) + (owner?.AbilityRuntime?.DefenseBonus ?? 0f);
         float mitigated = amount * (10f / (10f + Mathf.Max(0f, defense)));
         float absorbed = Mathf.Min(Shield, mitigated);
         Shield -= absorbed;
@@ -50,10 +54,13 @@ public class StatsComponent : MonoBehaviour
         StatsComponent sourceStats = source != null ? source.GetComponent<StatsComponent>() : null;
         if (sourceStats != null) sourceStats.DamageDealt += dealt;
         Damaged?.Invoke(dealt);
+        owner?.AbilityRuntime?.OnDamaged(dealt);
+        source?.AbilityRuntime?.OnHit(owner, dealt);
         if (_currentHP <= 0f && !_deathReported)
         {
             _deathReported = true;
             if (perks != null) perks.Knockout(owner, source);
+            owner?.Registry?.NotifyKnockout(owner, source);
             Died?.Invoke();
         }
         return dealt;

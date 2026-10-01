@@ -84,7 +84,8 @@ public class FireworkRocket : MonoBehaviour
                 Vector3 delta = opponent.transform.position - position;
                 delta.y = 0f;
                 if (delta.sqrMagnitude <= _explosionRadius * _explosionRadius)
-                    opponent.GetComponent<StatsComponent>()?.TakeDamage(damage, _source);
+                    opponent.GetComponent<StatsComponent>()?.TakeDamage(damage, _source,
+                        DamageKind.Fire, Vector3.Distance(_start, _end));
             }
         }
 

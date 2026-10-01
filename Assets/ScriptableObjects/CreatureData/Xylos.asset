@@ -24,5 +24,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2ae5b115928b43d08b071cb4d9d25533, type: 2}
   - {fileID: 11400000, guid: f435daae2bba4516adddf9e285b15359, type: 2}
   potentialAbilities:
+  - {fileID: 11400000, guid: 60df18846fa64639a62987c1072aa398, type: 2}
+  - {fileID: 11400000, guid: 1026370d75214277863f4bb12d6842ea, type: 2}
   - {fileID: 11400000, guid: b5f879419905448b9baf431a7fb23bf2, type: 2}
   - {fileID: 11400000, guid: 857233f78b5e4b2883829dcdb168b514, type: 2}

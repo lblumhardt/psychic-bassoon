@@ -176,7 +176,8 @@ public class FlamethrowerZone : MonoBehaviour
                 _wallMask, QueryTriggerInteraction.Ignore)) continue;
             // Overlapping flames from this cast never multiply the tick damage.
             opponent.GetComponent<StatsComponent>()?.TakeDamage(
-                _damage * (StreamActive ? 1f : _settings.groundDamageMultiplier), _caster);
+                _damage * (StreamActive ? 1f : _settings.groundDamageMultiplier), _caster,
+                StreamActive ? DamageKind.Fire : DamageKind.GroundFire);
         }
     }
 
