@@ -46,7 +46,8 @@ public class CreatureController : MonoBehaviour
             float statMultiplier = Mathf.Max(0.2f, _runtimeStats.moveSpeed / 5f);
             float abilityMultiplier = _ability != null
                 ? _ability.GetMoveSpeedMultiplier(Time.timeSinceLevelLoad) : 1f;
-            return statMultiplier * abilityMultiplier * PerkSpeedMultiplier * (AbilityRuntime?.MovementMultiplier ?? 1f);
+            return statMultiplier * abilityMultiplier * PerkSpeedMultiplier * (AbilityRuntime?.MovementMultiplier ?? 1f)
+                * RallyAbilitySO.GetTeamMultiplier(this);
         }
     }
 

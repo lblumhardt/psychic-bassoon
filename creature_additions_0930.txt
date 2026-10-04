@@ -1,0 +1,121 @@
+
+Name: Bellhop
+ overview:
+A little hotel bell with enormous arms and luggage for feet. Defensive support that treats teammates like very demanding guests.
+ability(s):
+Room Service - when an ally gets shoved into Bellhop, it catches them and gives them a small shield. Makes forced movement useful sometimes?
+move pool:
+Luggage Cart - sends a cart rolling across the arena. Scoops up the first teammate it touches and carries them forward, knocking enemies aside.
+Front Desk - drops a counter that blocks enemy projectiles until it breaks. Allies can move through it.
+references:
+Hotel service bell. Overloaded luggage trolley. Very serious about its job.
+
+—-------------------------------------------------------------------
+Name: Unspool
+ overview:
+A nervous spool of thread with sewing-needle legs. Connects creatures together. Probably fragile and a little too enthusiastic about helping.
+ability(s):
+Loose Ends - moving leaves a short thread trail. An enemy crossing it gets briefly tugged toward Unspool.
+move pool:
+Stitch Together - links two teammates for a duration. Healing either one gives the other a smaller heal too.
+Hemline - stitches two enemies together. If they move too far apart, the thread snaps and yanks them back toward each other. Could set up AOE attacks.
+references:
+Walking sewing kit. Red string of fate.
+
+—-------------------------------------------------------------------
+Name: Rummage
+ overview:
+A raccoon living in a dumpster that's much too small for it. Turns leftovers from the fight into equipment.
+ability(s):
+One Creature's Trash - collects nearby spent projectiles and broken arena objects as scrap. Only gets scrap after their normal effects finish so it doesn't steal Concreter's rebar early.
+move pool:
+Hand-Me-Down - spends scrap to give the nearest ally makeshift armor. Armor falls apart after blocking a few hits.
+Junk Cannon - fires whatever it has collected. More scrap = more pieces flying out, not necessarily better aim.
+references:
+Hermit crab but dumpster. Scrap knight.
+
+—-------------------------------------------------------------------
+Name: Hushroom
+ overview:
+A mushroom librarian carrying a book bigger than itself. Likes teammates who stop moving and enemies who stop casting.
+ability(s):
+Reading Time - allies that stay near it without moving gradually gain a shield. Good for slow creatures or ranged attackers holding a position.
+move pool:
+Quiet Please - throws a spore puff that briefly prevents special moves. Enemies can still move and use basic attacks.
+Overdue - marks an enemy. The next special move they use makes a heavy book fall on them after a short delay.
+references:
+Library mushroom. Angry little librarian. Book cap instead of mushroom cap?
+
+—-------------------------------------------------------------------
+Name: Bankshot
+ overview:
+A pool-ball beetle with a cue-stick horn. Ranged trick shots. Wants the arena cluttered with things to bounce attacks off.
+ability(s):
+Called Pocket - projectiles get stronger after their first bounce off a wall or obstacle. Concreter's rebar could count.
+move pool:
+Cue Ball - fires a heavy ball that ricochets and shoves whatever it hits.
+Bumper - places a mushroom-shaped pool bumper. Friendly projectiles bounce toward a nearby enemy when they hit it. Limited uses before it breaks.
+references:
+Billiards. Pinball bumpers. Rhinoceros beetle.
+
+—-------------------------------------------------------------------
+Name: Draft Horse
+ overview:
+A horse folded out of an unfinished weather report. Wind support. Paper mane covered in little arrows and crossed-out forecasts.
+ability(s):
+Tailwind - allies moving in the same direction as Draft Horse get a speed boost while nearby.
+move pool:
+Change of Forecast - a wide gust pushes enemies and loose hazards forward. Could spread Slamander's ground fires into an enemy team.
+Paper Plane - folds itself into a plane and glides through the fight, briefly giving allies it passes a speed boost.
+references:
+Origami horse. Weather maps. A very literal draft horse.
+
+—-------------------------------------------------------------------
+Name: Applouse
+ overview:
+A tiny theater parasite with giant white gloves. Hypes up whoever is having a good match. Could be charming or deeply annoying.
+ability(s):
+Standing Ovation - allied critical hits build applause, with a short cooldown so lots of tiny hits don't instantly fill it. At full applause, briefly boosts the team's attack speed. Horseshoe friend?
+move pool:
+Encore - marks an ally. Their next basic attack repeats once at reduced strength. The repeat can't trigger another repeat.
+Stage Fright - puts a spotlight on an enemy, reducing their damage while multiple allies are nearby.
+references:
+Flea circus. Theater usher. Disembodied cartoon applause hands.
+
+—-------------------------------------------------------------------
+Name: Waxolotl
+ overview:
+A candle axolotl with little burning wick gills. Bulky support that melts down as it helps the team.
+ability(s):
+Meltwater - taking fire damage leaves a wax puddle that slows enemies. Still takes the damage. Maybe allied ground fires can melt it slowly too?
+move pool:
+Seal the Cracks - spends some of its own health to coat an ally in protective wax. The coating blocks part of the next few hits.
+Recast - pulls its nearby wax puddles back into itself to heal, removing those slowing zones. Wants to alternate between melting and rebuilding.
+references:
+Drippy candle animal. Axolotl gills as a candelabra.
+
+—-------------------------------------------------------------------
+Name: Plusone
+ overview:
+A lonely party hat with ribbon legs. Gets excited whenever somebody new shows up. Summon support without necessarily summoning anything itself.
+ability(s):
+Welcome Party - when an allied summon or split creature appears, gives it a brief shield. Toadstack's tiny toads get a better chance to do something.
+move pool:
+Party Favor - gives an ally a wrapped present. When that ally dies, it drops a small healing pickup for a surviving teammate.
+Group Photo - flashes a camera in a cone. Damage is low, but the daze lasts a little longer for each nearby ally, up to a cap. Tiny summons count.
+references:
+Abandoned birthday decorations. Party hat creature. Desperate host energy.
+
+—-------------------------------------------------------------------
+Name: Undertow
+ overview:
+A deep-sea diver's helmet full of a tiny ocean. Walks on water pouring out of its neck. Controls where fights happen.
+ability(s):
+Heavy Boots - hard to shove. Moving slowly leaves shallow water that briefly slows enemies.
+move pool:
+Drain Plug - places a whirlpool that gradually drags nearby enemies toward its center. Sets up Entity's AOE or pulls enemies across hazards.
+Message in a Bottle - sends a bobbing bottle toward the weakest ally. Heals when it arrives; travels faster through Undertow's water.
+references:
+Antique diving helmet. An entire ocean living inside something small.
+
+—-------------------------------------------------------------------

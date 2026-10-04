@@ -19,6 +19,15 @@ public class PackedLunchPickup : MonoBehaviour
     private Material _boxMaterial;
     private Material _outlineMaterial;
 
+    public void ApplyWind(Vector3 displacement)
+    {
+        Vector3 step = WindArea.ClampPush(transform.position, displacement);
+        // Both arc endpoints move so the next FixedUpdate cannot snap the pickup back.
+        _start += step;
+        _end += step;
+        transform.position += step;
+    }
+
     public void Initialize(CreatureController source, CreatureRegistry registry, Team ownerTeam, Vector3 start, Vector3 end,
         float heal, float damage, float lobSeconds, float arcHeight, float lifetime, float pickupRadius)
     {

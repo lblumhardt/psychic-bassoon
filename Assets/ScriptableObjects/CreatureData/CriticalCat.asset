@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: CriticalCat
   m_EditorClassIdentifier: Assembly-CSharp::CreatureDataSO
   creatureName: Critical Cat
+  creatureTexture: {fileID: 2800000, guid: f6556dc7bf9e4ad5b74b94d0c08b200f, type: 3}
   baseStats:
     hp: 8
     power: 8

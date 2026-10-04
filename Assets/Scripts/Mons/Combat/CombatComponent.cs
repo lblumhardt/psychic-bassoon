@@ -65,6 +65,7 @@ public class CombatComponent : MonoBehaviour
             context.AttackSpeedMultiplier;
 
         GetComponent<CreatureVfx>()?.PlayAttack(target);
+        BattleMoveTags.Show(this, selectedAttack);
         creature?.AbilityRuntime?.OnMoveUsed();
 
         yield return selectedAttack.behavior.Execute(context);

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: DebugEnemyData
   m_EditorClassIdentifier: Assembly-CSharp::CreatureDataSO
   creatureName: Gooby
+  creatureTexture: {fileID: 2800000, guid: b52add47d0ad4151af1d752c5652a05b, type: 3}
   baseStats:
     hp: 10
     power: 6

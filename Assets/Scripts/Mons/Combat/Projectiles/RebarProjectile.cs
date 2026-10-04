@@ -33,6 +33,14 @@ public class RebarProjectile : MonoBehaviour
 
     public bool HasLaunched => _hasLaunched;
 
+    public void ApplyWind(Vector3 displacement)
+    {
+        if (!_hasLaunched) return;
+        Vector3 step = WindArea.ClampPush(transform.position, displacement, transform);
+        if (rb != null) rb.position += step;
+        else transform.position += step;
+    }
+
     public void Launch(Transform owner, Vector3 direction, float speed, float maxDistance)
     {
         if (_hasLaunched)

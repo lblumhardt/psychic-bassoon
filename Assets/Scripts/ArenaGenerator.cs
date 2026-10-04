@@ -151,18 +151,18 @@ public class ArenaGenerator : MonoBehaviour
         Vector3 b = new Vector3(halfWidth, 0f, -halfDepth);
         Vector3 c = new Vector3(halfWidth, 0f, halfDepth);
         Vector3 d = new Vector3(-halfWidth, 0f, halfDepth);
-        Wall(root, a, b);
-        Wall(root, b, c);
-        Wall(root, c, d);
-        Wall(root, d, a);
+        Wall(root, a, b, false);
+        Wall(root, b, c, false);
+        Wall(root, c, d, false);
+        Wall(root, d, a, false);
     }
 
     private void PolygonBoundary(Transform root, IReadOnlyList<Vector3> points)
     {
-        for (int i = 0; i < points.Count; i++) Wall(root, points[i], points[(i + 1) % points.Count]);
+        for (int i = 0; i < points.Count; i++) Wall(root, points[i], points[(i + 1) % points.Count], false);
     }
 
-    private void Wall(Transform root, Vector3 start, Vector3 end)
+    private void Wall(Transform root, Vector3 start, Vector3 end, bool windMovable = true)
     {
         Vector3 direction = end - start;
         float length = direction.magnitude;
@@ -176,6 +176,7 @@ public class ArenaGenerator : MonoBehaviour
         wall.transform.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
         wall.transform.localScale = new Vector3(WallThickness, WallHeight, length + WallThickness);
         wall.GetComponent<Renderer>().sharedMaterial = WallMaterial();
+        if (windMovable) wall.AddComponent<WindMovable>();
     }
 
     private void Pillar(Transform root, Vector3 position, float size = 2f)
@@ -187,6 +188,7 @@ public class ArenaGenerator : MonoBehaviour
         pillar.transform.position = position + Vector3.up * WallHeight * 0.5f;
         pillar.transform.localScale = new Vector3(size, WallHeight, size);
         pillar.GetComponent<Renderer>().sharedMaterial = WallMaterial();
+        pillar.AddComponent<WindMovable>();
     }
 
     private Material WallMaterial()
@@ -265,6 +267,10 @@ public class ArenaGenerator : MonoBehaviour
     private Material FloorMaterial()
     {
         if (_floorMaterial != null) return _floorMaterial;
+        BattleBackground background = gameObject.AddComponent<BattleBackground>();
+        Material animated = background.Initialize();
+        // BattleBackground owns the animated material and releases it on scene unload.
+        if (animated != null) return animated;
         Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
         _floorMaterial = new Material(shader) { color = new Color(0.055f, 0.075f, 0.11f) };
         _floorMaterial.SetFloat("_Smoothness", 0.2f);

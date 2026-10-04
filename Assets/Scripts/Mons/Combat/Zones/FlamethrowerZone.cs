@@ -20,6 +20,31 @@ public class FlamethrowerZone : MonoBehaviour
     private Texture2D _placeholderTexture;
     public bool StreamActive { get; private set; }
 
+    public bool ApplyWind(WindArea area, Vector3 displacement, bool spread)
+    {
+        if (StreamActive || _groundPoints == null) return false;
+        bool affected = false;
+        int originalCount = _groundPoints.Length;
+        for (int i = 0; i < originalCount; i++)
+        {
+            Vector3 point = _groundPoints[i];
+            if (!area.Reaches(point, _settings.groundFireRadius)) continue;
+            affected = true;
+            _groundPoints[i] += WindArea.ClampPush(point, displacement);
+            // Spread only once per Gale cast, with a bounded count and the original expiry/damage owner.
+            if (!spread || _groundPoints.Length >= 12) continue;
+            Vector3 offset = WindArea.ClampPush(point, area.Direction * Mathf.Max(0.8f, _settings.groundFireRadius * 1.5f));
+            if (offset.sqrMagnitude < 0.25f) continue;
+            int index = _groundPoints.Length;
+            System.Array.Resize(ref _groundPoints, index + 1);
+            System.Array.Resize(ref _groundFires, index + 1);
+            _groundPoints[index] = point + offset;
+            _groundFires[index] = CreateFlame("Wind-spread Ground Fire");
+            _groundFires[index].enabled = true;
+        }
+        return affected;
+    }
+
     public void Initialize(CreatureController caster, FlamethrowerBehaviorSO settings,
         Vector3 direction, float range, float damage, bool plus)
     {

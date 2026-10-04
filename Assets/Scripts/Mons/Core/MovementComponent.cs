@@ -17,6 +17,9 @@ public class MovementComponent : MonoBehaviour
     private float _slowMultiplier = 1f;
     private float _slowUntil;
     public bool IsSlowed => Time.time < _slowUntil && _slowMultiplier < 1f;
+    // Voluntary travel only: standing or being shoved must not activate Rally.
+    public Vector3 TravelDirection => isActiveAndEnabled && _isMoving && _knockbackTimeRemaining <= 0f
+        ? _currentMoveDirection : Vector3.zero;
 
     private void Awake()
     {

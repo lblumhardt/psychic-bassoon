@@ -470,6 +470,7 @@ MonoBehaviour:
   moveSceneName: MoveScreen
   startingCreature: {fileID: 11400000, guid: ebec6e74f7a3eb7489f2f1d3b46d5a25, type: 2}
   monsterPool:
+  - {fileID: 11400000, guid: 51f7ed63acc546cc8b6ead976d1adc06, type: 2}
   - {fileID: 11400000, guid: ebec6e74f7a3eb7489f2f1d3b46d5a25, type: 2}
   - {fileID: 11400000, guid: 2b9770041df14554ba43bc23566ef7db, type: 2}
   - {fileID: 11400000, guid: c4000000000000000000000000000001, type: 2}

@@ -1,0 +1,17 @@
+/* Appearance lives here; timing and placement are in BattleMoveTagSettings.asset. */
+.battle-move-tag {
+    position: absolute;
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+    color: rgb(245, 248, 255);
+    background-color: rgba(15, 22, 34, 0.94);
+    padding: 3px 7px;
+    border-width: 1px;
+    border-color: rgb(125, 148, 175);
+    border-radius: 4px;
+}
+.battle-move-tag--player { border-color: rgb(65, 174, 255); }
+.battle-move-tag--enemy { border-color: rgb(255, 107, 98); }
+.battle-move-tag--plus { color: rgb(255, 224, 135); }
