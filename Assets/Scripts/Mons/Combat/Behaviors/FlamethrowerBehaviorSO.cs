@@ -34,7 +34,7 @@ public class FlamethrowerBehaviorSO : AttackBehaviorSO
         if (context.caster == null || context.target == null || context.attackData == null) yield break;
         CreatureController caster = context.caster.GetComponent<CreatureController>();
         if (caster == null || caster.IsDead || caster.Registry == null) yield break;
-        Vector3 direction = context.target.position - context.caster.position;
+        Vector3 direction = context.AimPosition - context.caster.position;
         direction.y = 0f;
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
         GameObject effectObject = new GameObject("Flamethrower");

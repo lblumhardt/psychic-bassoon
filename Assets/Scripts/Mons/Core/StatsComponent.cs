@@ -11,6 +11,7 @@ public class StatsComponent : MonoBehaviour
     public event Action<float> Damaged;
     public event Action<float> Healed;
     public event Action Died;
+    public event Action Revived;
 
     public float HealthFraction => _maxHP > 0f ? Mathf.Clamp01(_currentHP / _maxHP) : 0f;
     public float MaxHP => _maxHP;
@@ -44,6 +45,7 @@ public class StatsComponent : MonoBehaviour
         BattlePerks perks = owner != null && owner.Registry != null ? owner.Registry.Perks : null;
         float defense = _defense + (perks != null ? perks.DefenseBonus(owner) : 0f) + (owner?.AbilityRuntime?.DefenseBonus ?? 0f);
         float mitigated = amount * (10f / (10f + Mathf.Max(0f, defense)));
+        mitigated = owner != null ? owner.BlockFirstHit(mitigated) : mitigated;
         float absorbed = Mathf.Min(Shield, mitigated);
         Shield -= absorbed;
         ShieldAbsorbed += absorbed;
@@ -59,6 +61,7 @@ public class StatsComponent : MonoBehaviour
         if (_currentHP <= 0f && !_deathReported)
         {
             _deathReported = true;
+            owner?.BeginRevival();
             if (perks != null) perks.Knockout(owner, source);
             owner?.Registry?.NotifyKnockout(owner, source);
             Died?.Invoke();
@@ -88,5 +91,13 @@ public class StatsComponent : MonoBehaviour
 
     public bool IsDead() {
         return _currentHP <= 0;
+    }
+
+    public void Revive()
+    {
+        if (MatchFinished || !IsDead()) return;
+        _currentHP = 1f;
+        _deathReported = false;
+        Revived?.Invoke();
     }
 }

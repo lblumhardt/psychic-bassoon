@@ -27,7 +27,7 @@ public class RebarShotBehaviorSO : AttackBehaviorSO
         }
 
         Vector3 origin = context.caster.position + Vector3.up * spawnHeightOffset;
-        Vector3 targetCenter = context.target.position + Vector3.up * 0.5f;
+        Vector3 targetCenter = context.AimPosition + Vector3.up * 0.5f;
         Vector3 toTarget = targetCenter - origin;
         if (toTarget.sqrMagnitude < 0.0001f)
         {

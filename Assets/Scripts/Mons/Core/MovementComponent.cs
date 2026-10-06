@@ -33,6 +33,7 @@ public class MovementComponent : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (_creature != null && _creature.IsDead) return;
         Vector3 delta = Vector3.zero;
 
         if (_knockbackTimeRemaining > 0f)
@@ -58,6 +59,7 @@ public class MovementComponent : MonoBehaviour
     /// </summary>
     public void ApplyKnockback(Vector3 worldDirectionXZ, float speed, float durationSeconds)
     {
+        if (_creature != null && _creature.IsDead) return;
         Vector3 dir = worldDirectionXZ;
         dir.y = 0f;
         if (dir.sqrMagnitude < 0.0001f)
@@ -97,6 +99,14 @@ public class MovementComponent : MonoBehaviour
         }
 
         _isMoving = false;
+    }
+
+    public void ResetMotion()
+    {
+        _isMoving = false;
+        _knockbackTimeRemaining = 0f;
+        _rigidbody.linearVelocity = Vector3.zero;
+        _rigidbody.angularVelocity = Vector3.zero;
     }
 
     private void OnCollisionEnter(Collision collision)

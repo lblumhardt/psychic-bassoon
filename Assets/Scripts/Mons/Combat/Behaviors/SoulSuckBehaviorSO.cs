@@ -15,7 +15,8 @@ public class SoulSuckBehaviorSO : AttackBehaviorSO
         if (context.caster == null || context.target == null) yield break;
 
         CreatureController caster = context.caster.GetComponent<CreatureController>();
-        CreatureController victim = context.target.GetComponent<CreatureController>();
+        Transform resolvedTarget = context.ResolveTarget();
+        CreatureController victim = resolvedTarget != null ? resolvedTarget.GetComponent<CreatureController>() : null;
         if (caster == null || victim == null || caster.Team == victim.Team || victim.IsDead) yield break;
 
         StatsComponent casterStats = caster.GetComponent<StatsComponent>();

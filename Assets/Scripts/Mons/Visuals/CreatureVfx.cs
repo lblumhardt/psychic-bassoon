@@ -11,6 +11,8 @@ public class CreatureVfx : MonoBehaviour
     private Coroutine _flashRoutine;
     private Color _teamColor;
     private bool _knockedOut;
+    private readonly System.Collections.Generic.List<Collider> _revivalColliders = new();
+    private Vector3 _restScale;
 
     private void Awake()
     {
@@ -18,6 +20,7 @@ public class CreatureVfx : MonoBehaviour
         _creature = GetComponent<CreatureController>();
         _renderers = GetComponentsInChildren<Renderer>();
         _properties = new MaterialPropertyBlock();
+        _restScale = transform.localScale;
         RefreshTeamColor();
     }
 
@@ -26,6 +29,7 @@ public class CreatureVfx : MonoBehaviour
         _stats.Damaged += OnDamaged;
         _stats.Healed += OnHealed;
         _stats.Died += OnDied;
+        _stats.Revived += OnRevived;
     }
 
     private void OnDisable()
@@ -33,6 +37,7 @@ public class CreatureVfx : MonoBehaviour
         _stats.Damaged -= OnDamaged;
         _stats.Healed -= OnHealed;
         _stats.Died -= OnDied;
+        _stats.Revived -= OnRevived;
     }
 
     public void PlayAttack(Transform target)
@@ -81,10 +86,35 @@ public class CreatureVfx : MonoBehaviour
         _knockedOut = true;
         StopAllCoroutines();
         _flashRoutine = null;
+        transform.localScale = _restScale;
+        if (_creature.IsReviving)
+        {
+            _revivalColliders.Clear();
+            foreach (Collider c in GetComponentsInChildren<Collider>())
+                if (c.enabled) _revivalColliders.Add(c);
+            PrepareForKnockout();
+            SetRendererColor(Color.gray);
+            return;
+        }
         CombatVfxBurst.Spawn(transform.position + Vector3.up * 0.6f,
             _teamColor, 28, 2.3f, 0.65f);
         PrepareForKnockout();
         StartCoroutine(KnockoutRoutine());
+    }
+
+    private void OnRevived()
+    {
+        _knockedOut = false;
+        ClearRendererColor();
+        GetComponent<MovementComponent>().enabled = true;
+        GetComponent<CombatComponent>().enabled = true;
+        foreach (Collider c in _revivalColliders) if (c != null) c.enabled = true;
+        _revivalColliders.Clear();
+        Rigidbody body = GetComponent<Rigidbody>();
+        if (body != null) body.isKinematic = false;
+        Transform healthBar = transform.Find("Health Bar");
+        if (healthBar != null) healthBar.gameObject.SetActive(true);
+        FloatingCombatText.Spawn(transform.position + Vector3.up * 1.4f, "Revived", Color.white);
     }
 
     private void Flash(Color color)
@@ -123,6 +153,7 @@ public class CreatureVfx : MonoBehaviour
         if (movement != null)
         {
             movement.StopAllCoroutines();
+            movement.ResetMotion();
             movement.enabled = false;
         }
         CombatComponent combat = GetComponent<CombatComponent>();

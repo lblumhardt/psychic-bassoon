@@ -424,7 +424,7 @@ public class BattleManager : MonoBehaviour
     {
         foreach (CreatureController creature in creatures)
         {
-            if (creature != null && creature.isActiveAndEnabled && !creature.IsDead) return true;
+            if (creature != null && creature.isActiveAndEnabled && (!creature.IsDead || creature.IsReviving)) return true;
         }
         return false;
     }

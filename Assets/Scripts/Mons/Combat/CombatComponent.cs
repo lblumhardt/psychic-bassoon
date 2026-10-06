@@ -59,6 +59,8 @@ public class CombatComponent : MonoBehaviour
         // often this creature acts; the move clock prevents strong moves from spam.
         float now = Time.time;
         CreatureController creature = GetComponent<CreatureController>();
+        if (creature != null && creature.IsDead) yield break;
+        context.bonusDamage = creature != null ? creature.ConsumeAttackBonus() : 0f;
         float cooldownMultiplier = creature != null ? creature.MoveCooldownMultiplier : 1f;
         _moveReadyTimes[selectedAttack] = now + Mathf.Max(0f, selectedAttack.cooldown) * cooldownMultiplier;
         _nextGlobalAttackTime = now + Mathf.Max(0.05f, baseAttackInterval) /
@@ -68,7 +70,17 @@ public class CombatComponent : MonoBehaviour
         BattleMoveTags.Show(this, selectedAttack);
         creature?.AbilityRuntime?.OnMoveUsed();
 
+        Coroutine secondCast = null;
+        if (creature != null && creature.HasFlowerScent)
+        {
+            AttackContext second = context;
+            second.randomCast = true;
+            float angle = Random.Range(0f, Mathf.PI * 2f);
+            second.randomDirection = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
+            secondCast = StartCoroutine(selectedAttack.behavior.Execute(second));
+        }
         yield return selectedAttack.behavior.Execute(context);
+        if (secondCast != null) yield return secondCast;
 
         if (selectedAttack.duration > 0f)
         {

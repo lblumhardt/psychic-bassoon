@@ -25,7 +25,7 @@ public class FissureBehaviorSO : AttackBehaviorSO
         if (caster == null || caster.Registry == null) yield break;
 
         Vector3 start = context.caster.position;
-        Vector3 direction = context.target.position - start;
+        Vector3 direction = context.AimPosition - start;
         direction.y = 0f;
         if (direction.sqrMagnitude < 0.001f) direction = context.caster.forward;
         direction.y = 0f;

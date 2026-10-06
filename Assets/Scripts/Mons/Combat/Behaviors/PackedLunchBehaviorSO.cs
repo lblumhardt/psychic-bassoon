@@ -38,11 +38,11 @@ public class PackedLunchBehaviorSO : AttackBehaviorSO
 
         Vector3 start = context.caster.position;
         Vector3 end;
-        if (injuredAlly != null)
+        if (injuredAlly != null && !context.randomCast)
             end = injuredAlly.transform.position;
         else
         {
-            Vector3 forward = context.target != null ? context.target.position - start : context.caster.forward;
+            Vector3 forward = context.target != null ? context.AimPosition - start : context.caster.forward;
             forward.y = 0f;
             end = start + forward.normalized * 2.5f;
         }
@@ -50,7 +50,7 @@ public class PackedLunchBehaviorSO : AttackBehaviorSO
 
         GameObject lunch = new GameObject("Packed Lunch");
         lunch.AddComponent<PackedLunchPickup>().Initialize(caster, caster.Registry, caster.Team, start, end,
-            context.Damage * (context.isPlus ? plusHealingMultiplier : 1f), opponentDamage,
+            context.Damage * (context.isPlus ? plusHealingMultiplier : 1f), opponentDamage * (context.randomCast ? 0.5f : 1f),
             lobSeconds / caster.ProjectileSpeedMultiplier,
             arcHeight, pickupLifetimeSeconds, pickupRadius);
     }

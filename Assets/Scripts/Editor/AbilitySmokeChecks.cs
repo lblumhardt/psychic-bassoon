@@ -9,7 +9,7 @@ public static class AbilitySmokeChecks
     private static readonly List<UnityEngine.Object> created = new();
     private static CreatureRegistry registry;
     private static CreatureController Make(Team team, PassiveAbilityKind? kind = null,
-        float strength = 0, float duration = 0, float radius = 0)
+        float strength = 0, float duration = 0, float radius = 0, CreatureItemSO spray = null)
     {
         var obj = new GameObject("Ability check");
         created.Add(obj);
@@ -34,7 +34,7 @@ public static class AbilitySmokeChecks
             ability.radius = radius;
             Require(!string.IsNullOrEmpty(ability.Description), "Missing description");
         }
-        creature.Configure(species, Array.Empty<AttackDataSO>(), ability, new CreatureStats(100, 5, 10, 5, 5), null, null);
+        creature.Configure(species, Array.Empty<AttackDataSO>(), ability, new CreatureStats(100, 5, 10, 5, 5), null, spray);
         creature.SetTeam(team);
         creature.SetRegistry(registry);
         return creature;
@@ -151,7 +151,47 @@ public static class AbilitySmokeChecks
                 Require(b.IsDead && c.IsDead && d.IsDead, "Burst did not chain");
                 Near(Stats(a).CurrentHP, 100, "Friendly fire");
             });
-            Debug.Log("ALL 12 ABILITY CHECKS PASSED");
+            Check("Spray assets and stat bonuses", () => {
+                var rage = Resources.Load<CreatureItemSO>("Items/RageConcentrate");
+                var mirror = Resources.Load<CreatureItemSO>("Items/LiquidMirror");
+                Near(rage.ApplyStats(new CreatureStats(100, 5, 10, 5, 5)).power, 8, "Rage attack");
+                Near(mirror.ApplyStats(new CreatureStats(100, 5, 10, 5, 5)).defense, 12, "Mirror defense");
+                foreach (string name in new[] { "AngelAsh", "FlowerScent", "CourageCologne", "ConfidenceCologne" })
+                    Require(Resources.Load<CreatureItemSO>("Items/" + name).slot == CreatureItemSlot.Spray, "Wrong slot");
+            });
+            Check("Courage blocks only the first hit", () => {
+                var spray = Resources.Load<CreatureItemSO>("Items/CourageCologne");
+                var a = Make(Team.Player, spray: spray);
+                var b = Make(Team.Player, spray: spray);
+                Near(Stats(a).TakeDamage(10), 0, "First small hit");
+                Near(Stats(a).TakeDamage(100), 50, "Second hit");
+                Near(Stats(b).TakeDamage(100), 30, "Independent first hit");
+            });
+            Check("Confidence applies once per move", () => {
+                var a = Make(Team.Player, spray: Resources.Load<CreatureItemSO>("Items/ConfidenceCologne"));
+                var move = ScriptableObject.CreateInstance<AttackDataSO>(); created.Add(move); move.damage = 10;
+                var context = new AttackContext { caster = a.transform, attackData = move, bonusDamage = a.ConsumeAttackBonus() };
+                Near(context.Damage, 30, "First move");
+                Near(context.Damage, 30, "Damage remains fixed for multihit move");
+                Near(a.ConsumeAttackBonus(), 0, "Consumed bonus");
+                context.randomCast = true;
+                Near(context.Damage, 15, "Half damage copy");
+            });
+            Check("Angel Ash delays defeat and revives once", () => {
+                var a = Make(Team.Player, spray: Resources.Load<CreatureItemSO>("Items/AngelAsh"));
+                Stats(a).TakeDamage(1000);
+                Require(a.IsDead && a.IsReviving, "Revival not pending");
+                Near(Stats(a).TakeDamage(100), 0, "Damage while dead");
+                var living = typeof(BattleManager).GetMethod("HasLivingCreature", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+                Require((bool)living.Invoke(null, new object[] { registry.playerCreatures }), "Round ended while revival pending");
+                typeof(CreatureController).GetField("_reviveAt", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(a, Time.time - 1f);
+                typeof(CreatureController).GetMethod("Update", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Invoke(a, null);
+                Near(Stats(a).CurrentHP, 1, "Revived HP");
+                Require(!a.IsReviving && !a.IsDead, "Revival did not complete");
+                Stats(a).TakeDamage(1000);
+                Require(a.IsDead && !a.IsReviving, "Revived twice");
+            });
+            Debug.Log("ALL ABILITY AND SPRAY CHECKS PASSED");
             if (Application.isBatchMode) EditorApplication.Exit(0);
         }
         catch (Exception exception)

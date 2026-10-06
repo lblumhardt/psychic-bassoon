@@ -6,12 +6,15 @@ public enum CreatureItemSlot
     Spray
 }
 
+public enum SprayEffect { None, AngelAsh, FlowerScent, CourageCologne, ConfidenceCologne }
+
 [CreateAssetMenu(menuName = "Mons/Creature Item")]
 public class CreatureItemSO : ScriptableObject
 {
     public string displayName;
     [TextArea] public string description;
     public CreatureItemSlot slot;
+    public SprayEffect sprayEffect;
     [Min(0)] public int price = 2;
 
     [Header("Flat Stat Bonuses")]

@@ -20,7 +20,7 @@ public class StompBehaviorSO : AttackBehaviorSO
         if (context.caster == null || context.attackData == null) yield break;
         var caster = context.caster.GetComponent<CreatureController>();
         if (caster == null || caster.IsDead || caster.Registry == null) yield break;
-        Vector3 toward = context.target != null ? context.target.position - context.caster.position : context.caster.forward;
+        Vector3 toward = context.target != null ? context.AimPosition - context.caster.position : context.caster.forward;
         toward.y = 0;
         toward = Vector3.ClampMagnitude(toward, Mathf.Max(0f, context.attackData.range));
         Vector3 down = Camera.main != null ? -Camera.main.transform.up : Vector3.back;

@@ -21,7 +21,7 @@ public class FireworkBehaviorSO : AttackBehaviorSO
 
         GameObject rocket = new GameObject("Firework Rocket");
         rocket.AddComponent<FireworkRocket>().Initialize(caster, caster.Registry, caster.Team,
-            context.caster.position, context.target.position,
+            context.caster.position, context.AimPosition,
             context.Damage,
             rocketFlightSeconds / caster.ProjectileSpeedMultiplier,
             explosionRadius * (context.isPlus ? plusRadiusMultiplier : 1f), scatterRadius, satelliteDamageMultiplier);

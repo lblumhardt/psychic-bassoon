@@ -20,7 +20,7 @@ public class FruitTossBehaviorSO : AttackBehaviorSO
 
         GameObject apple = new GameObject("Fruit Toss Apple");
         apple.AddComponent<FruitProjectile>().Initialize(caster, caster.Registry, caster.Team,
-            context.caster.position, context.target.position,
+            context.caster.position, context.AimPosition,
             context.Damage * (context.isPlus ? plusDamageMultiplier : 1f),
             Mathf.Max(0.05f, flightSeconds / caster.ProjectileSpeedMultiplier),
             screenArcHeight, Mathf.Max(0.1f, impactRadius));

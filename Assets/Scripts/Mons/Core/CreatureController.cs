@@ -22,6 +22,32 @@ public class CreatureController : MonoBehaviour
     private bool _statsAssigned;
     private CreatureItemSO _heldItem;
     private CreatureItemSO _spray;
+    private bool _revivalUsed, _courageUsed, _confidenceUsed;
+    private float _reviveAt;
+    public bool IsReviving { get; private set; }
+    public bool HasFlowerScent => _spray != null && _spray.sprayEffect == SprayEffect.FlowerScent;
+
+    public float ConsumeAttackBonus()
+    {
+        if (_confidenceUsed || _spray == null || _spray.sprayEffect != SprayEffect.ConfidenceCologne) return 0f;
+        _confidenceUsed = true;
+        return 20f;
+    }
+
+    public float BlockFirstHit(float damage)
+    {
+        if (_courageUsed || _spray == null || _spray.sprayEffect != SprayEffect.CourageCologne) return damage;
+        _courageUsed = true;
+        return Mathf.Max(0f, damage - 20f);
+    }
+
+    public void BeginRevival()
+    {
+        if (_revivalUsed || _spray == null || _spray.sprayEffect != SprayEffect.AngelAsh) return;
+        _revivalUsed = true;
+        IsReviving = true;
+        _reviveAt = Time.time + 1f;
+    }
 
     public Team Team => team;
     public bool IsDead => statsComponent != null && statsComponent.IsDead();
@@ -102,6 +128,8 @@ public class CreatureController : MonoBehaviour
         _statsAssigned = true;
         _heldItem = heldItem;
         _spray = spray;
+        _revivalUsed = _courageUsed = _confidenceUsed = false;
+        IsReviving = false;
         // Configure can run while BattleManager.Start is still creating the teams.
         // Apply immediately so a newly cloned creature never spends a frame at 0 HP.
         ApplyCreatureData();
@@ -173,6 +201,12 @@ public class CreatureController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (IsReviving && Time.time >= _reviveAt && !statsComponent.MatchFinished)
+        {
+            IsReviving = false;
+            _isExecutingBehavior = false;
+            statsComponent.Revive();
+        }
         if (_registry != null && _registry.Perks == null) return;
         if (statsComponent.IsDead()) {
             return;

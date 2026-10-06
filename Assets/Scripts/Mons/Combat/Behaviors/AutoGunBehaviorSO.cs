@@ -38,7 +38,7 @@ public class AutoGunBehaviorSO : AttackBehaviorSO
         int shotCount = shotsPerBurst + (context.isPlus ? plusExtraShots : 0);
         for (int shot = 0; shot < shotCount && !shooter.IsDead; shot++)
         {
-            Transform target = targeting.GetTarget();
+            Transform target = context.randomCast ? context.ResolveTarget() : targeting.GetTarget();
             if (target == null) break;
 
             CreatureController victim = target.GetComponent<CreatureController>();

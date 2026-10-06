@@ -21,7 +21,7 @@ public class RainCloudBehaviorSO : AttackBehaviorSO
         CreatureController caster = context.caster.GetComponent<CreatureController>();
         if (caster == null || caster.Registry == null) yield break;
 
-        Vector3 direction = context.target.position - context.caster.position;
+        Vector3 direction = context.AimPosition - context.caster.position;
         direction.y = 0f;
         if (direction.sqrMagnitude < 0.001f) direction = context.caster.forward;
         direction.y = 0f;

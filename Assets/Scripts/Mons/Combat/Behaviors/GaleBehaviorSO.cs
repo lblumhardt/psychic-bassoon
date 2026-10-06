@@ -15,7 +15,7 @@ public class GaleBehaviorSO : AttackBehaviorSO
         if (context.caster == null || context.attackData == null) yield break;
         CreatureController caster = context.caster.GetComponent<CreatureController>();
         if (caster == null || caster.IsDead || caster.Registry == null) yield break;
-        Vector3 direction = context.target != null ? context.target.position - context.caster.position : context.caster.forward;
+        Vector3 direction = context.target != null ? context.AimPosition - context.caster.position : context.caster.forward;
         var zone = new GameObject("Gale").AddComponent<GaleZone>();
         zone.Initialize(caster, direction, context.attackData.range,
             width * (context.isPlus ? plusWidthMultiplier : 1f), pushSpeed, channelSeconds, context.Damage);
