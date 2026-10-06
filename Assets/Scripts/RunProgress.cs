@@ -28,5 +28,6 @@ public static class RunProgress
         if (IsOver) return;
         if (result == RoundResult.Win) Wins++;
         else if (result == RoundResult.Loss) Losses++;
+        if (result != RoundResult.None) RunRoster.ClearNextRoundBonuses();
     }
 }

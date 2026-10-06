@@ -15,7 +15,7 @@ MonoBehaviour:
   attackName: Stomp
   damage: 4
   selectionWeight: 1
-  cooldown: 3
-  range: 2.5
+  cooldown: 2.8
+  range: 5
   duration: 0.15
   behavior: {fileID: 11400000, guid: d98b58446ff54235aa7df7199d04a902, type: 2}

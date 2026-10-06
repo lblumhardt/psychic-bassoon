@@ -32,6 +32,7 @@ public class BattleManager : MonoBehaviour
     private void Awake()
     {
         Time.timeScale = 1f;
+        if (SandboxSession.Active) Random.InitState(SandboxSession.Seed + SandboxSession.TrialsCompleted);
         GameObject registryObject = new GameObject("CreatureRegistry");
         registryObject.transform.SetParent(transform);
         _creatureRegistry = registryObject.AddComponent<CreatureRegistry>();
@@ -56,7 +57,7 @@ public class BattleManager : MonoBehaviour
             if (creature.Team == Team.Player)
             {
                 if (playerTemplate == null) playerTemplate = creature;
-                if (RunRoster.Members.Count == 0)
+                if (!RunRoster.Initialized && RunRoster.Members.Count == 0)
                     RunRoster.TryAdd(CreatureInstance.Generate(creature.creatureData));
             }
             else if (enemyTemplate == null)
@@ -112,6 +113,10 @@ public class BattleManager : MonoBehaviour
             }
         }
 
+        // Botulinum may intentionally leave an empty roster. Do not resurrect the scene starter.
+        if (RunRoster.Members.Count == 0)
+            foreach (CreatureController creature in creatures)
+                if (creature.Team == Team.Player) creature.gameObject.SetActive(false);
         }
 
         creatures = FindObjectsByType<CreatureController>(FindObjectsSortMode.None);
@@ -132,7 +137,8 @@ public class BattleManager : MonoBehaviour
             _participants.Add(creature);
         }
 
-        _roundStarted = HasTeam(_creatureRegistry.playerCreatures) && HasTeam(_creatureRegistry.enemyCreatures);
+        _roundStarted = (HasTeam(_creatureRegistry.playerCreatures) || (!SandboxSession.Active && RunRoster.Initialized))
+            && HasTeam(_creatureRegistry.enemyCreatures);
         _roundReadyFrame = Time.frameCount + 1;
         if (!_roundStarted)
         {
@@ -156,13 +162,19 @@ public class BattleManager : MonoBehaviour
 
         bool playerAlive = HasLivingCreature(_creatureRegistry.playerCreatures);
         bool enemyAlive = HasLivingCreature(_creatureRegistry.enemyCreatures);
-        if (playerAlive && enemyAlive) return;
+        bool timedOut = SandboxSession.Active && Time.timeSinceLevelLoad >= SandboxSession.TimeLimit;
+        if (playerAlive && enemyAlive && !timedOut) return;
 
         // If both teams die during the same frame, count it as a loss.
-        LastResult = playerAlive ? RoundResult.Win : RoundResult.Loss;
+        LastResult = timedOut && playerAlive && enemyAlive ? RoundResult.None : playerAlive ? RoundResult.Win : RoundResult.Loss;
         _roundEnded = true;
         if (!SandboxSession.Active) RunProgress.RecordResult(LastResult);
         EndRound();
+        if (SandboxSession.Active && SandboxSession.RecordTrial(LastResult, Time.timeSinceLevelLoad, _participants))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            return;
+        }
         ShowResult();
     }
 
@@ -186,6 +198,7 @@ public class BattleManager : MonoBehaviour
         _speedLabel = ToolkitUi.Label("Speed 1×", 16, Color.white, true);
         _speedLabel.style.marginRight = 10;
         controls.Add(_speedLabel);
+        if (SandboxSession.Active) SetBattleSpeed(SandboxSession.Speed);
 
         Label roundLabel = ToolkitUi.Label(
             SandboxSession.Active ? $"Sandbox · {_arena.ArenaName}" : $"Round {OpponentRoster.RoundNumber} · {_arena.ArenaName}\n{RunProgress.Summary}",
@@ -200,7 +213,7 @@ public class BattleManager : MonoBehaviour
         if (SandboxSession.Active)
         {
             controls.Add(ToolkitUi.Button("Edit Teams", ReturnToSandbox));
-            controls.Add(ToolkitUi.Button("Restart Test", () => SceneManager.LoadScene(SceneManager.GetActiveScene().name)));
+            controls.Add(ToolkitUi.Button("Restart Tests", RestartSandboxTests));
         }
         VisualElement rosters = new VisualElement();
         rosters.style.flexDirection = FlexDirection.Row;
@@ -322,6 +335,7 @@ public class BattleManager : MonoBehaviour
     {
         if (_roundEnded) return;
         Time.timeScale = Mathf.Clamp(multiplier, 1f, 8f);
+        if (SandboxSession.Active) SandboxSession.Speed = Time.timeScale;
         if (_speedLabel != null) _speedLabel.text = $"Speed {Time.timeScale:0}×";
     }
 
@@ -334,10 +348,21 @@ public class BattleManager : MonoBehaviour
         root.style.alignItems = Align.Center;
         string title = !SandboxSession.Active && RunProgress.IsOver
             ? (RunProgress.HasWon ? "You Won the Run!" : "Run Over")
-            : (LastResult == RoundResult.Win ? "Victory!" : "Defeat!");
+            : (SandboxSession.Active && LastResult == RoundResult.None ? "Time limit reached" : LastResult == RoundResult.Win ? "Victory!" : "Defeat!");
         PostMatchSummary.Show(root, title, _participants, SandboxSession.Active ? ReturnToSandbox : ContinueToShop);
         if (SandboxSession.Active)
-            root.Add(ToolkitUi.Button("Replay Test", () => SceneManager.LoadScene(SceneManager.GetActiveScene().name)));
+        {
+            Label batch = ToolkitUi.Label(SandboxSession.LastBatchSummary, 16, Color.white, true);
+            batch.style.whiteSpace = WhiteSpace.Normal;
+            root.Add(batch);
+            root.Add(ToolkitUi.Button("Replay Same Tests", RestartSandboxTests));
+        }
+    }
+
+    private void RestartSandboxTests()
+    {
+        SandboxSession.BeginTrials();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     private void ReturnToSandbox()

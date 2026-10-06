@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: FruitTossBehavior
   m_EditorClassIdentifier: Assembly-CSharp::FruitTossBehaviorSO
   windupSeconds: 0.2
-  flightSeconds: 0.65
+  flightSeconds: 0.45
   screenArcHeight: 1.6
-  impactRadius: 0.9
+  impactRadius: 1.3

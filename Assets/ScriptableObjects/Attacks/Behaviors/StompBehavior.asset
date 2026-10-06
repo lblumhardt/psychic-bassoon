@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c2a1145db4842e3b26595193274a043, type: 3}
   m_Name: StompBehavior
   m_EditorClassIdentifier: Assembly-CSharp::StompBehaviorSO
-  size: 1.6
-  windupSeconds: 0.25
+  size: 2.1
+  windupSeconds: 0.2
   dropSeconds: 0.18
   dropDistance: 2
   shoveSpeed: 6

@@ -224,19 +224,22 @@ public class CreatureController : MonoBehaviour
     {
         _isExecutingBehavior = true;
 
-        // Start movement coroutine.
-        yield return movementComponent.MoveRoutine();
-
-        // Once movement is done, grab a target from targeting component.
-        Transform target = targetingComponent.GetTarget();
-
-        // Once we have a target, start attack coroutine.
-        if (target != null)
+        // Roaming and combat have independent clocks. Waiting for a whole wander
+        // cycle before every cast made attack speed and most cooldown bonuses inert.
+        StartCoroutine(RoamRoutine());
+        while (!IsDead && !statsComponent.MatchFinished)
         {
-            yield return combatComponent.AttackRoutine(target);
+            Transform target = targetingComponent.GetTarget();
+            if (target != null) yield return combatComponent.AttackRoutine(target);
+            yield return null;
         }
-
         _isExecutingBehavior = false;
+    }
+
+    private IEnumerator RoamRoutine()
+    {
+        while (!IsDead && !statsComponent.MatchFinished)
+            yield return movementComponent.MoveRoutine();
     }
 
     public void SetRegistry(CreatureRegistry registry)

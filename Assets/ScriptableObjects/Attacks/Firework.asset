@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Firework
   m_EditorClassIdentifier: Assembly-CSharp::AttackDataSO
   attackName: Firework
-  damage: 2
-  cooldown: 2
+  damage: 3
+  cooldown: 2.8
   range: 10
   duration: 0.25
   behavior: {fileID: 11400000, guid: b187f538e7b840d7bcb46a2c51e998a6, type: 2}

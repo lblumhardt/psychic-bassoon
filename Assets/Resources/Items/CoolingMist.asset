@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: CoolingMist
   m_EditorClassIdentifier: Assembly-CSharp::CreatureItemSO
   displayName: Cooling Mist
-  description: Moves recharge 15% faster without changing attack rhythm.
+  description: Moves recharge 35% faster without changing attack rhythm.
   slot: 1
-  price: 3
+  price: 2
   hp: 0
   power: 0
   defense: 0
   moveSpeed: 0
   attackSpeed: 0
   damageMultiplier: 1
-  moveCooldownMultiplier: 0.85
+  moveCooldownMultiplier: 0.65
   projectileSpeedMultiplier: 1

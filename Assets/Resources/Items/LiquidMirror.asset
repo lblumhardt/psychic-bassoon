@@ -16,7 +16,7 @@ MonoBehaviour:
   description: +2 Defense.
   slot: 1
   sprayEffect: 0
-  price: 3
+  price: 2
   hp: 0
   power: 0
   defense: 2

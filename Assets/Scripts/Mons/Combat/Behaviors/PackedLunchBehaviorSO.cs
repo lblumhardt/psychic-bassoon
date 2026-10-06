@@ -39,7 +39,12 @@ public class PackedLunchBehaviorSO : AttackBehaviorSO
         Vector3 start = context.caster.position;
         Vector3 end;
         if (injuredAlly != null && !context.randomCast)
-            end = injuredAlly.transform.position;
+        {
+            // Lead voluntary movement during the lob instead of landing behind the ally.
+            MovementComponent movement = injuredAlly.GetComponent<MovementComponent>();
+            end = injuredAlly.transform.position + (movement != null ? movement.TravelDirection : Vector3.zero)
+                * 2f * injuredAlly.MoveSpeedMultiplier * lobSeconds / caster.ProjectileSpeedMultiplier;
+        }
         else
         {
             Vector3 forward = context.target != null ? context.AimPosition - start : context.caster.forward;
@@ -50,7 +55,7 @@ public class PackedLunchBehaviorSO : AttackBehaviorSO
 
         GameObject lunch = new GameObject("Packed Lunch");
         lunch.AddComponent<PackedLunchPickup>().Initialize(caster, caster.Registry, caster.Team, start, end,
-            context.Damage * (context.isPlus ? plusHealingMultiplier : 1f), opponentDamage * (context.randomCast ? 0.5f : 1f),
+            context.Damage * (context.isPlus ? plusHealingMultiplier : 1f), opponentDamage * caster.PowerMultiplier * (context.randomCast ? 0.5f : 1f),
             lobSeconds / caster.ProjectileSpeedMultiplier,
             arcHeight, pickupLifetimeSeconds, pickupRadius);
     }

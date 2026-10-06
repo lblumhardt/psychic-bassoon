@@ -15,7 +15,7 @@ MonoBehaviour:
   displayName: Windup Watch
   description: Keeps attacks on tempo. +2 Attack Speed.
   slot: 0
-  price: 3
+  price: 2
   hp: 0
   power: 0
   defense: 0

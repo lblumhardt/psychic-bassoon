@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: ShellCharm
   m_EditorClassIdentifier: Assembly-CSharp::CreatureItemSO
   displayName: Shell Charm
-  description: A sturdy keepsake. +2 HP, +2 Defense, -1 Move Speed.
+  description: A sturdy keepsake. +4 HP, +3 Defense, -1 Move Speed.
   slot: 0
   price: 3
-  hp: 2
+  hp: 4
   power: 0
-  defense: 2
+  defense: 3
   moveSpeed: -1
   attackSpeed: 0
   damageMultiplier: 1

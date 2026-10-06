@@ -17,6 +17,8 @@ public class CreatureInstance
     [SerializeField] private CreatureItemSO spray;
     [SerializeField] private int mergedCopies;
     [SerializeField] private bool consumed;
+    [SerializeField] private int permanentPower, permanentDefense;
+    [SerializeField] private int nextRoundPower, nextRoundDefense;
 
     public string Id => id;
     public CreatureDataSO Species => species;
@@ -32,6 +34,9 @@ public class CreatureInstance
     public bool IsConsumed => consumed;
     public string LevelSummary => ProgressSummary(CopyCount);
     public CreatureStats BaseStats => stats.AtLevel(Level);
+    public CreatureStats OriginalStats => stats;
+    public int AddedPower => permanentPower + nextRoundPower;
+    public int AddedDefense => permanentDefense + nextRoundDefense;
     public CreatureStats Stats
     {
         get
@@ -46,6 +51,8 @@ public class CreatureInstance
     {
         int level = copies >= LevelThreeCopies ? 3 : copies >= LevelTwoCopies ? 2 : 1;
         CreatureStats result = stats.AtLevel(level);
+        result.power += permanentPower + nextRoundPower;
+        result.defense += permanentDefense + nextRoundDefense;
         if (heldItem != null) result = heldItem.ApplyStats(result);
         if (spray != null) result = spray.ApplyStats(result);
         return result;
@@ -107,8 +114,25 @@ public class CreatureInstance
     {
         if (item == null) return;
         if (item.slot == CreatureItemSlot.HeldItem) heldItem = item;
-        else spray = item;
+        else if (item.slot == CreatureItemSlot.Spray) spray = item;
     }
+
+    public void AddStatBonus(int power, int defense, bool nextRoundOnly = false)
+    {
+        if (nextRoundOnly) { nextRoundPower += power; nextRoundDefense += defense; }
+        else { permanentPower += power; permanentDefense += defense; }
+    }
+
+    public void ClearNextRoundBonuses() => nextRoundPower = nextRoundDefense = 0;
+    public string NextRoundBonusSummary => nextRoundPower == 0 && nextRoundDefense == 0 ? "" :
+        $"Next round only: +{nextRoundPower} Attack / +{nextRoundDefense} Defense";
+
+    // A synthetic, level-one donor offers only this creature's existing moves.
+    public CreatureInstance CreateTwinDonor() => new CreatureInstance
+    {
+        id = Guid.NewGuid().ToString("N"), species = species, stats = stats,
+        ability = ability, equippedMoves = (AttackDataSO[])equippedMoves.Clone()
+    };
 
     public static CreatureInstance Generate(CreatureDataSO species)
     {

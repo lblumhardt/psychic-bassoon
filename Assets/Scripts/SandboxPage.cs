@@ -20,6 +20,12 @@ public static class SandboxPage
         var header = new VisualElement();
         header.style.flexDirection = FlexDirection.Row;
         header.Add(ToolkitUi.Button("Main Menu", back));
+        if (SandboxSession.ReturnToShop)
+            header.Add(ToolkitUi.Button("Return to Shop", () =>
+            {
+                SandboxSession.Active = SandboxSession.OpenEditor = SandboxSession.ReturnToShop = false;
+                SceneManager.LoadScene("ShopScene");
+            }));
         header.Add(ToolkitUi.Label("  Sandbox · Battle debugger", 28, Color.white, true));
         root.Add(header);
         if (catalog == null || catalog.creatures.Length == 0)
@@ -33,6 +39,51 @@ public static class SandboxPage
         hint.style.whiteSpace = WhiteSpace.Normal;
         hint.style.marginTop = hint.style.marginBottom = 10;
         root.Add(hint);
+        var shortcuts = new VisualElement();
+        shortcuts.style.flexDirection = FlexDirection.Row;
+        shortcuts.style.flexWrap = Wrap.Wrap;
+        var import = ToolkitUi.Button("Load Current Run Teams", () => { SandboxSession.LoadRunTeams(); redrawTeams(); });
+        import.SetEnabled(RunRoster.Members.Count > 0);
+        shortcuts.Add(import);
+        shortcuts.Add(ToolkitUi.Button("Mirror Your Team to Enemy", () =>
+        {
+            SandboxSession.Enemy.Clear();
+            foreach (SandboxCreature creature in SandboxSession.Player) SandboxSession.Enemy.Add(creature.Copy());
+            redrawTeams();
+        }));
+        root.Add(shortcuts);
+        void redrawTeams() => Show(host, back);
+        var settings = new VisualElement();
+        settings.style.flexDirection = FlexDirection.Row;
+        settings.style.flexWrap = Wrap.Wrap;
+        root.Add(settings);
+        var seed = new IntegerField("Seed") { value = SandboxSession.Seed, isDelayed = true };
+        seed.RegisterValueChangedCallback(e => SandboxSession.Seed = e.newValue);
+        settings.Add(seed);
+        var batches = new List<string> { "1 test", "10 tests", "25 tests" };
+        var batch = new DropdownField("Batch", batches, SandboxSession.TrialCount == 25 ? 2 : SandboxSession.TrialCount == 10 ? 1 : 0);
+        batch.RegisterValueChangedCallback(e => SandboxSession.TrialCount = batch.index == 2 ? 25 : batch.index == 1 ? 10 : 1);
+        settings.Add(batch);
+        var speeds = new List<string> { "1x", "2x", "4x", "8x" };
+        var speed = new DropdownField("Speed", speeds, Mathf.Clamp(Mathf.RoundToInt(Mathf.Log(SandboxSession.Speed, 2f)), 0, 3));
+        speed.RegisterValueChangedCallback(e => SandboxSession.Speed = Mathf.Pow(2f, speed.index));
+        settings.Add(speed);
+        var limit = new FloatField("Time limit (game seconds)") { value = SandboxSession.TimeLimit, isDelayed = true };
+        limit.RegisterValueChangedCallback(e =>
+        {
+            SandboxSession.TimeLimit = Mathf.Clamp(e.newValue, 10f, 300f);
+            limit.SetValueWithoutNotify(SandboxSession.TimeLimit);
+        });
+        settings.Add(limit);
+        var testingHint = ToolkitUi.Label("Replay uses the same seed sequence and arenas. Change one move or item, rerun the batch, and compare win rate and damage. Timeouts end stalemates.", 13, Color.white);
+        testingHint.style.whiteSpace = WhiteSpace.Normal;
+        root.Add(testingHint);
+        if (!string.IsNullOrEmpty(SandboxSession.LastBatchSummary))
+        {
+            var previous = ToolkitUi.Label("Previous batch: " + SandboxSession.LastBatchSummary, 14, new Color(0.6f, 0.85f, 1f));
+            previous.style.whiteSpace = WhiteSpace.Normal;
+            root.Add(previous);
+        }
         var teams = new VisualElement();
         teams.style.flexDirection = FlexDirection.Row;
         teams.style.flexGrow = 1;
@@ -43,7 +94,7 @@ public static class SandboxPage
         AddTeam(teams, "Enemy team", SandboxSession.Enemy, catalog, redraw);
         var error = ToolkitUi.Label("", 14, new Color(1f, 0.5f, 0.4f));
         root.Add(error);
-        root.Add(ToolkitUi.Button("Start Test Battle", () =>
+        root.Add(ToolkitUi.Button("Run Tests", () =>
         {
             if (SandboxSession.Player.Concat(SandboxSession.Enemy).Any(c => c.Moves.Any(m => m == null || m.behavior == null)))
             {
@@ -55,7 +106,7 @@ public static class SandboxPage
                 error.text = "The testScene battle scene is missing from Build Settings.";
                 return;
             }
-            SandboxSession.Active = true;
+            SandboxSession.BeginTrials();
             SceneManager.LoadScene("testScene");
         }));
     }
@@ -100,6 +151,8 @@ public static class SandboxPage
             Choose(card, "Spray", catalog.items.Where(i => i.slot == CreatureItemSlot.Spray).ToArray(), creature.Spray, i => i.displayName,
                 i => { creature.Spray = i; updateStats(); }, true);
             card.Add(ToolkitUi.Label("Base stats (before level and equipment bonuses)", 14, Color.white));
+            if (creature.AddedPower != 0 || creature.AddedDefense != 0)
+                card.Add(ToolkitUi.Label($"Imported goop bonuses: +{creature.AddedPower} Power / +{creature.AddedDefense} Defense", 13, Color.white));
             Stat(card, "HP", creature.BaseStats.hp, v => { creature.BaseStats.hp = v; updateStats(); });
             Stat(card, "Power", creature.BaseStats.power, v => { creature.BaseStats.power = v; updateStats(); });
             Stat(card, "Defense", creature.BaseStats.defense, v => { creature.BaseStats.defense = v; updateStats(); });
@@ -121,7 +174,8 @@ public static class SandboxPage
                 var row = new VisualElement();
                 row.style.flexDirection = FlexDirection.Row;
                 if (native) row.style.backgroundColor = new Color(0.12f, 0.32f, 0.23f);
-                var label = ToolkitUi.Label(move.attackName + (move.DebugOnly ? " · DEBUG ONLY" : native ? " · IN POOL" : "") + (move.behavior == null ? " · No behavior" : ""), 14,
+                var label = ToolkitUi.Label(move.attackName + (move.DebugOnly ? " · DEBUG ONLY" : native ? " · IN POOL" : "") +
+                    $" · Power {move.damage:0.#} · Recharge {move.cooldown:0.#}s · Range {move.range:0.#}" + (move.behavior == null ? " · No behavior" : ""), 14,
                     native ? new Color(0.5f, 1f, 0.65f) : Color.white);
                 label.style.flexGrow = 1;
                 label.style.flexBasis = 0;
@@ -163,6 +217,13 @@ public static class SandboxPage
         if (allowNone) options.Insert(0, null);
         var labels = options.Select((v, i) => v == null ? "None" : $"{label(v)} [{i + 1}]").ToList();
         var field = new DropdownField(title, labels, Mathf.Max(0, options.IndexOf(selected)));
+        if (typeof(CreatureItemSO).IsAssignableFrom(typeof(T)))
+        {
+            var description = ToolkitUi.Label((selected as CreatureItemSO)?.description ?? "", 13, new Color(0.72f, 0.79f, 0.87f));
+            description.style.whiteSpace = WhiteSpace.Normal;
+            field.RegisterValueChangedCallback(e => description.text = (options[field.index] as CreatureItemSO)?.description ?? "");
+            parent.Add(description);
+        }
         if (typeof(CreatureAbilitySO).IsAssignableFrom(typeof(T)))
             ToolkitUi.AbilityTooltip(field, () => field.index >= 0 && field.index < options.Count
                 ? options[field.index] as CreatureAbilitySO : null);

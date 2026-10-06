@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: StonecoatSpray
   m_EditorClassIdentifier: Assembly-CSharp::CreatureItemSO
   displayName: Stonecoat Spray
-  description: Hardens the hide. +3 Defense, -1 Move Speed.
+  description: Hardens the hide. +4 Defense, -1 Move Speed.
   slot: 1
-  price: 3
+  price: 2
   hp: 0
   power: 0
-  defense: 3
+  defense: 4
   moveSpeed: -1
   attackSpeed: 0
   damageMultiplier: 1

@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: RocketWax
   m_EditorClassIdentifier: Assembly-CSharp::CreatureItemSO
   displayName: Rocket Wax
-  description: Slick coating makes projectiles travel 35% faster.
+  description: Projectiles travel 60% faster. +1 Attack Speed.
   slot: 1
   price: 2
   hp: 0
   power: 0
   defense: 0
   moveSpeed: 0
-  attackSpeed: 0
+  attackSpeed: 1
   damageMultiplier: 1
   moveCooldownMultiplier: 1
-  projectileSpeedMultiplier: 1.35
+  projectileSpeedMultiplier: 1.6

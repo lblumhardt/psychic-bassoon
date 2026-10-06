@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: VitalityLocket
   m_EditorClassIdentifier: Assembly-CSharp::CreatureItemSO
   displayName: Vitality Locket
-  description: A warm little charm. +4 HP.
+  description: A warm little charm. +6 HP.
   slot: 0
-  price: 3
-  hp: 4
+  price: 2
+  hp: 6
   power: 0
   defense: 0
   moveSpeed: 0

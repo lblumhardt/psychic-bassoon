@@ -16,7 +16,7 @@ MonoBehaviour:
   description: The first move each battle deals 20 extra damage.
   slot: 1
   sprayEffect: 4
-  price: 3
+  price: 5
   hp: 0
   power: 0
   defense: 0

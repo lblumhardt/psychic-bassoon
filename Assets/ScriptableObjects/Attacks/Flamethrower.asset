@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Flamethrower
   m_EditorClassIdentifier: Assembly-CSharp::AttackDataSO
   attackName: Flamethrower
-  damage: 1
-  cooldown: 7
+  damage: 1.2
+  cooldown: 5
   range: 9
   duration: 0.15
   behavior: {fileID: 11400000, guid: 6fe9bd8d0f1b49adbf1ed3ec121df67b, type: 2}

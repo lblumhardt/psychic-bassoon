@@ -18,15 +18,15 @@ public class ShopPage : MonoBehaviour
     private CreatureItemSO[] _itemOffers => RunShop.Items;
     private CreatureItemSO[] _itemPool;
     private VisualElement _root;
-    private int _money;
+    private int _money { get => RunShop.Money; set => RunShop.Money = value; }
     private int _pendingItemIndex = -1;
 
     private void Start()
     {
-        _money = RoundBudget;
+        bool newRound = RunShop.RefreshBudget(RunProgress.Wins + RunProgress.Losses, RoundBudget);
         RunRoster.InitializeIfEmpty(startingCreature);
         _itemPool = Resources.LoadAll<CreatureItemSO>("Items");
-        RollOffers();
+        if (newRound || !RunShop.OffersPrepared) RollOffers();
         RunPerks.PrepareDraft();
         _root = ToolkitUi.Attach(this, new Color(0.06f, 0.09f, 0.14f));
         _root.style.flexDirection = FlexDirection.Column;
@@ -35,6 +35,7 @@ public class ShopPage : MonoBehaviour
 
     private void RollOffers()
     {
+        RunShop.OffersPrepared = true;
         List<CreatureDataSO> creatures = new();
         if (monsterPool != null)
             foreach (CreatureDataSO creature in monsterPool)
@@ -44,7 +45,7 @@ public class ShopPage : MonoBehaviour
         {
             if (RunShop.CreatureLocked[i] && _creatureOffers[i] != null) continue;
             _creatureOffers[i] = creatures.Count > 0
-                ? CreatureInstance.Generate(creatures[Random.Range(0, creatures.Count)]) : null;
+                ? RunShop.GenerateCreature(creatures[Random.Range(0, creatures.Count)]) : null;
         }
 
         List<CreatureItemSO> items = new();
@@ -63,7 +64,7 @@ public class ShopPage : MonoBehaviour
                 _itemOffers[i] = null;
                 continue;
             }
-            int choice = Random.Range(0, items.Count);
+            int choice = RunShop.ChooseItem(items);
             _itemOffers[i] = items[choice];
             items.RemoveAt(choice);
         }
@@ -113,12 +114,18 @@ public class ShopPage : MonoBehaviour
         bank.Add(reroll);
         header.Add(bank);
         top.Add(header);
+        if (RunShop.CreatureStatBonus > 0)
+            top.Add(ToolkitUi.Label($"Shop creatures: +{RunShop.CreatureStatBonus} Attack / +{RunShop.CreatureStatBonus} Defense", 14, muted));
+        if (RunRoster.Members.Count == 0)
+            top.Add(ToolkitUi.Label("Your roster is empty. Buy a creature before the next round or take a loss.", 15, new Color(1f, 0.85f, 0.35f)));
 
         if (_pendingItemIndex >= 0 && _itemOffers[_pendingItemIndex] != null)
         {
             CreatureItemSO selected = _itemOffers[_pendingItemIndex];
             Label prompt = ToolkitUi.Label(
-                $"Choose a creature below for {selected.displayName}. Its current {SlotName(selected)} will be replaced.",
+                selected.slot == CreatureItemSlot.Consumable
+                    ? $"Choose a creature below to use {selected.displayName} on. {selected.description}"
+                    : $"Choose a creature below for {selected.displayName}. Its current {SlotName(selected)} will be replaced.",
                 15, new Color(1f, 0.85f, 0.35f), true);
             prompt.style.marginBottom = 8;
             top.Add(prompt);
@@ -149,6 +156,15 @@ public class ShopPage : MonoBehaviour
         rosterHeader.Add(ToolkitUi.Label(
             $"Your Roster ({RunRoster.Members.Count}/{RunRoster.MaxMembers})", 26, Color.white, true));
         rosterHeader.Add(ToolkitUi.Button("Inspect Loadouts", () => SceneManager.LoadScene(moveSceneName)));
+        Button test = ToolkitUi.Button("Test Loadouts", () =>
+        {
+            SandboxSession.LoadRunTeams();
+            SandboxSession.ReturnToShop = true;
+            SandboxSession.OpenEditor = true;
+            SceneManager.LoadScene("MainMenu");
+        });
+        test.SetEnabled(RunRoster.Members.Count > 0);
+        rosterHeader.Add(test);
         bottom.Add(rosterHeader);
         Label perks = ToolkitUi.Label(RunPerks.Summary, 13, muted);
         perks.style.whiteSpace = WhiteSpace.Normal;
@@ -225,7 +241,7 @@ public class ShopPage : MonoBehaviour
         Button buy = ToolkitUi.Button(
             _pendingItemIndex == index ? "Cancel" : $"Buy Â· {item.price}",
             () => SelectItem(index));
-        buy.SetEnabled(_pendingItemIndex == index || _money >= item.price);
+        buy.SetEnabled(_pendingItemIndex == index || (_money >= item.price && CanPurchaseItem(item)));
         card.Add(buy);
         AddLockButton(card, index, true);
     }
@@ -233,7 +249,7 @@ public class ShopPage : MonoBehaviour
     private void AddLockButton(VisualElement card, int index, bool item)
     {
         bool[] locks = item ? RunShop.ItemLocked : RunShop.CreatureLocked;
-        Button freeze = ToolkitUi.Button(locks[index] ? "Frozen · Unfreeze" : "Freeze", () =>
+        Button freeze = ToolkitUi.Button(locks[index] ? "Frozen Â· Unfreeze" : "Freeze", () =>
         {
             locks[index] = !locks[index];
             Render();
@@ -275,6 +291,8 @@ public class ShopPage : MonoBehaviour
         identity.style.marginBottom = 6;
         identity.Add(ToolkitUi.Label($"{index + 1}. {member.Species.creatureName}", 19, Color.white, true));
         identity.Add(ToolkitUi.Label(member.LevelSummary, 13, new Color(0.45f, 0.8f, 1f)));
+        if (!string.IsNullOrEmpty(member.NextRoundBonusSummary))
+            identity.Add(ToolkitUi.Label(member.NextRoundBonusSummary, 13, new Color(1f, 0.85f, 0.4f)));
         identity.Add(ToolkitUi.Label(
             $"Held: {ItemName(member.HeldItem)}   Spray: {ItemName(member.Spray)}", 13, muted));
         identity.Add(ToolkitUi.Label($"{MoveName(member, 0)} / {MoveName(member, 1)}", 13, Color.white));
@@ -295,7 +313,9 @@ public class ShopPage : MonoBehaviour
 
         if (_pendingItemIndex >= 0 && _itemOffers[_pendingItemIndex] != null)
         {
-            Button equip = ToolkitUi.Button("Give Item", () => EquipItem(index));
+            CreatureItemSO pending = _itemOffers[_pendingItemIndex];
+            Button equip = ToolkitUi.Button(pending.slot == CreatureItemSlot.Consumable ? "Use " + pending.displayName : "Give Item", () => EquipItem(index));
+            equip.SetEnabled(pending.consumableEffect != ConsumableEffect.TwinBrother || member.Level < CreatureInstance.MaxLevel);
             equip.style.marginRight = 8;
             row.Add(equip);
         }
@@ -323,7 +343,7 @@ public class ShopPage : MonoBehaviour
         return false;
     }
 
-    private void ShowMergeChoices(CreatureInstance donor, int shopIndex)
+    private void ShowMergeChoices(CreatureInstance donor, int shopIndex, CreatureInstance twinReceiver = null, int twinItemIndex = -1)
     {
         if (donor == null || !HasMergeTarget(donor)) return;
         VisualElement overlay = new();
@@ -342,8 +362,11 @@ public class ShopPage : MonoBehaviour
         VisualElement donorPortrait = ToolkitUi.CreaturePortrait(donor.Species, 64);
         donorPortrait.style.marginBottom = 8;
         panel.Add(donorPortrait);
-        panel.Add(ToolkitUi.Label($"Merge {donor.Species.creatureName} intoâ€¦", 25, Color.white, true));
+        bool isTwin = twinReceiver != null;
+        panel.Add(ToolkitUi.Label(isTwin ? $"Twin Brother Â· {twinReceiver.Species.creatureName}" : $"Merge {donor.Species.creatureName} intoâ€¦", 25, Color.white, true));
         Label rules = ToolkitUi.Label(
+            isTwin ? "Adds one copy toward leveling up. Keeps this creature's ability, equipment, and stat bonuses.\n" +
+            "No new moves. Level 2: choose one plus move. Level 3: both moves are plus." :
             $"Consumes the selected {(shopIndex >= 0 ? "shop" : "roster")} creature" +
             (shopIndex >= 0 ? $" for {CreaturePrice} money. " : ". ") +
             $"Contributes {donor.CopyCount} {(donor.CopyCount == 1 ? "copy" : "copies")}.\n" +
@@ -363,6 +386,7 @@ public class ShopPage : MonoBehaviour
         for (int i = 0; i < RunRoster.Members.Count; i++)
         {
             CreatureInstance receiver = RunRoster.Members[i];
+            if (isTwin && !ReferenceEquals(receiver, twinReceiver)) continue;
             if (!receiver.CanMerge(donor)) continue;
             VisualElement choice = ToolkitUi.Panel(new Color(0.12f, 0.17f, 0.24f));
             choice.style.marginBottom = 8;
@@ -401,8 +425,10 @@ public class ShopPage : MonoBehaviour
             choice.Add(plusPreview);
             Label selectionLabel = ToolkitUi.Label("", 15, Color.white, true);
             choice.Add(selectionLabel);
-            Button confirm = ToolkitUi.Button(shopIndex >= 0 ? $"Confirm merge · {CreaturePrice}" : "Confirm merge",
-                () => CompleteMerge(donor, receiver, shopIndex, selected));
+            Button confirm = ToolkitUi.Button(isTwin ? $"Use Twin Brother Â· {_itemOffers[twinItemIndex].price}" :
+                shopIndex >= 0 ? $"Confirm merge Â· {CreaturePrice}" : "Confirm merge",
+                () => { if (isTwin) CompleteTwin(donor, receiver, twinItemIndex, selected);
+                    else CompleteMerge(donor, receiver, shopIndex, selected); });
             void UpdateSelection()
             {
                 selectionLabel.text = $"Keep {required} distinct moves ({selected.Count}/{required} selected). Unselected moves are lost.";
@@ -422,7 +448,7 @@ public class ShopPage : MonoBehaviour
                 foreach (AttackDataSO equipped in receiver.EquippedMoves) if (equipped == move) fromReceiver = true;
                 foreach (AttackDataSO equipped in donor.EquippedMoves) if (equipped == move) fromDonor = true;
                 string origin = fromReceiver && fromDonor ? "Both creatures" : fromReceiver ? "Receiver" : "Donor";
-                Toggle toggle = new Toggle($"{move.attackName} · {origin} · Base power {move.damage:0.#} · Cooldown {move.cooldown:0.#}s · Range {move.range:0.#}");
+                Toggle toggle = new Toggle($"{move.attackName} Â· {origin} Â· Base power {move.damage:0.#} Â· Cooldown {move.cooldown:0.#}s Â· Range {move.range:0.#}");
                 toggle.value = selected.Contains(move);
                 toggle.style.color = Color.white;
                 toggle.style.marginTop = 6;
@@ -479,6 +505,20 @@ public class ShopPage : MonoBehaviour
     private void SelectItem(int index)
     {
         if (index < 0 || index >= _itemOffers.Length || _itemOffers[index] == null) return;
+        CreatureItemSO item = _itemOffers[index];
+        if (_pendingItemIndex == index) { _pendingItemIndex = -1; Render(); return; }
+        if (_money < item.price || !CanPurchaseItem(item)) return;
+        if (!item.NeedsCreatureTarget)
+        {
+            if (item.consumableEffect == ConsumableEffect.PartyGoop)
+            {
+                if (!RunRoster.ApplyPartyGoop()) return;
+            }
+            else if (item.consumableEffect == ConsumableEffect.HelpWantedSign) RunShop.ApplyHelpWantedSign();
+            else return;
+            CompleteItemPurchase(index);
+            return;
+        }
         _pendingItemIndex = _pendingItemIndex == index ? -1 : index;
         Render();
     }
@@ -490,12 +530,60 @@ public class ShopPage : MonoBehaviour
         CreatureItemSO item = _itemOffers[_pendingItemIndex];
         if (item == null || _money < item.price) return;
 
-        RunRoster.Members[creatureIndex].Equip(item);
-        _money -= item.price;
-        _itemOffers[_pendingItemIndex] = null;
-        RunShop.ItemLocked[_pendingItemIndex] = false;
+        CreatureInstance creature = RunRoster.Members[creatureIndex];
+        if (item.slot == CreatureItemSlot.Consumable)
+        {
+            switch (item.consumableEffect)
+            {
+                case ConsumableEffect.Goop: creature.AddStatBonus(1, 1); break;
+                case ConsumableEffect.DoubleGoop: creature.AddStatBonus(2, 2); break;
+                case ConsumableEffect.HyperGoop: creature.AddStatBonus(4, 4, true); break;
+                case ConsumableEffect.Botulinum:
+                    if (!RunRoster.Remove(creature)) return;
+                    break;
+                case ConsumableEffect.TwinBrother:
+                    if (creature.Level >= CreatureInstance.MaxLevel) return;
+                    ShowMergeChoices(creature.CreateTwinDonor(), -1, creature, _pendingItemIndex);
+                    return;
+                default: return;
+            }
+        }
+        else creature.Equip(item);
+        CompleteItemPurchase(_pendingItemIndex);
+    }
+
+    private void CompleteItemPurchase(int index)
+    {
+        _money -= _itemOffers[index].price;
+        _itemOffers[index] = null;
+        RunShop.ItemLocked[index] = false;
         _pendingItemIndex = -1;
         Render();
+    }
+
+    private void CompleteTwin(CreatureInstance donor, CreatureInstance receiver, int index,
+        IReadOnlyList<AttackDataSO> moves)
+    {
+        if (index < 0 || index >= _itemOffers.Length) return;
+        CreatureItemSO item = _itemOffers[index];
+        if (item == null || item.consumableEffect != ConsumableEffect.TwinBrother || _money < item.price ||
+            receiver.Level >= CreatureInstance.MaxLevel) return;
+        bool inRoster = false;
+        foreach (CreatureInstance member in RunRoster.Members) if (ReferenceEquals(member, receiver)) inRoster = true;
+        if (!inRoster || !receiver.TryMerge(donor, moves)) return;
+        CompleteItemPurchase(index);
+    }
+
+    private static bool CanPurchaseItem(CreatureItemSO item)
+    {
+        if (item.consumableEffect == ConsumableEffect.HelpWantedSign && item.slot == CreatureItemSlot.Consumable) return true;
+        if (item.consumableEffect == ConsumableEffect.TwinBrother && item.slot == CreatureItemSlot.Consumable)
+        {
+            foreach (CreatureInstance member in RunRoster.Members)
+                if (member.Level < CreatureInstance.MaxLevel) return true;
+            return false;
+        }
+        return RunRoster.Members.Count > 0;
     }
 
     private void Reroll()
@@ -515,7 +603,7 @@ public class ShopPage : MonoBehaviour
 
     private static string ItemName(CreatureItemSO item) => item != null ? item.displayName : "None";
     private static string SlotName(CreatureItemSO item) =>
-        item.slot == CreatureItemSlot.HeldItem ? "Held Item" : "Spray";
+        item.slot == CreatureItemSlot.HeldItem ? "Held Item" : item.slot == CreatureItemSlot.Spray ? "Spray" : "Consumable";
 
     private void Sell(int index)
     {

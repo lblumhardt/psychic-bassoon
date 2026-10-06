@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: IronDumbbell
   m_EditorClassIdentifier: Assembly-CSharp::CreatureItemSO
   displayName: Iron Dumbbell
-  description: A heavy weight. +2 Power, -1 Move Speed.
+  description: A heavy weight. +3 Power, -1 Move Speed.
   slot: 0
-  price: 3
+  price: 2
   hp: 0
-  power: 2
+  power: 3
   defense: 0
   moveSpeed: -1
   attackSpeed: 0

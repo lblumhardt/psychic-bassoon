@@ -53,7 +53,7 @@ public class RebarShotBehaviorSO : AttackBehaviorSO
             // No max travel distance — lifetime and collisions are handled on RebarProjectile.
             CreatureController caster = context.caster.GetComponent<CreatureController>();
             float speedMultiplier = caster != null ? caster.ProjectileSpeedMultiplier : 1f;
-            projectile.Launch(context.caster, direction, projectileSpeed * speedMultiplier * (context.isPlus ? plusSpeedMultiplier : 1f), maxDistance: 0f);
+            projectile.Launch(context.caster, direction, projectileSpeed * speedMultiplier * (context.isPlus ? plusSpeedMultiplier : 1f), maxDistance: 0f, damage: context.Damage);
         }
     }
 }

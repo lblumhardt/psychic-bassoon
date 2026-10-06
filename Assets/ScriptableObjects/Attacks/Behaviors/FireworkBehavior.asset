@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FireworkBehavior
   m_EditorClassIdentifier: Assembly-CSharp::FireworkBehaviorSO
   windupSeconds: 0.3
-  rocketFlightSeconds: 0.7
-  explosionRadius: 1.1
+  rocketFlightSeconds: 0.5
+  explosionRadius: 1.5
   scatterRadius: 2.4
-  satelliteDamageMultiplier: 0.5
+  satelliteDamageMultiplier: 0.4

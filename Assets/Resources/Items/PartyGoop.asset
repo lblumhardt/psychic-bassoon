@@ -10,16 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31f207eb17474439af12709afc43ab9d, type: 3}
-  m_Name: RunningShoes
+  m_Name: PartyGoop
   m_EditorClassIdentifier: Assembly-CSharp::CreatureItemSO
-  displayName: Running Shoes
-  description: Lightweight trainers. +3 Move Speed.
-  slot: 0
+  displayName: Party Goop
+  description: Give two different random roster creatures +1 Attack and +1 Defense permanently. With one creature, buffs it once.
+  slot: 2
+  consumableEffect: 4
+  shopWeight: 0.85
+  sprayEffect: 0
   price: 2
   hp: 0
   power: 0
   defense: 0
-  moveSpeed: 3
+  moveSpeed: 0
   attackSpeed: 0
   damageMultiplier: 1
   moveCooldownMultiplier: 1

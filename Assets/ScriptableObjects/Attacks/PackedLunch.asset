@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: PackedLunch
   m_EditorClassIdentifier: Assembly-CSharp::AttackDataSO
   attackName: Packed Lunch
-  damage: 3
-  cooldown: 1.5
+  damage: 5
+  cooldown: 2.8
   range: 8
   duration: 0.25
   behavior: {fileID: 11400000, guid: a0159d52eb8a4e8ca426330900bb6070, type: 2}

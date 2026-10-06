@@ -36,7 +36,7 @@ public class CombatComponent : MonoBehaviour
         while (selectedAttack == null && attacks != null && attacks.Count > 0)
         {
             float nextReadyTime = GetNextAttackTime();
-            float waitSeconds = Mathf.Max(0.01f, nextReadyTime - Time.time);
+            float waitSeconds = Mathf.Max(0.1f, nextReadyTime - Time.time);
             yield return new WaitForSeconds(waitSeconds);
             selectedAttack = SelectReadyAttack();
         }
@@ -45,6 +45,10 @@ public class CombatComponent : MonoBehaviour
         {
             yield break;
         }
+
+        // A target can die while this creature waits for its move to recharge.
+        target = GetComponent<TargetingComponent>()?.GetTarget();
+        if (target == null) yield break;
 
         AttackContext context = new AttackContext
         {
@@ -127,6 +131,16 @@ public class CombatComponent : MonoBehaviour
     private bool IsReady(AttackDataSO attack)
     {
         if (attack == null || attack.behavior == null) return false;
+        // A support pickup can be prepared before contact. Other moves wait for
+        // their actual range rather than wasting short-range casts or sniping across the arena.
+        if (!(attack.behavior is PackedLunchBehaviorSO) && attack.range > 0f)
+        {
+            Transform target = GetComponent<TargetingComponent>()?.GetTarget();
+            if (target == null) return false;
+            Vector3 offset = target.position - transform.position;
+            offset.y = 0f;
+            if (offset.sqrMagnitude > attack.range * attack.range) return false;
+        }
         return !_moveReadyTimes.TryGetValue(attack, out float readyTime) || Time.time >= readyTime;
     }
 

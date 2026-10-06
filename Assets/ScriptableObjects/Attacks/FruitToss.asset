@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: FruitToss
   m_EditorClassIdentifier: Assembly-CSharp::AttackDataSO
   attackName: Fruit Toss
-  damage: 2
-  cooldown: 1.2
+  damage: 3
+  cooldown: 1.4
   range: 8
   duration: 0.25
   behavior: {fileID: 11400000, guid: e3c789d2a13f432eaf9255b6e7ce612b, type: 2}

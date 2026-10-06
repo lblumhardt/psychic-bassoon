@@ -31,14 +31,30 @@ public static class OpponentRoster
             if (starter != null) Creatures.Add(CreatureInstance.Generate(starter));
         }
 
-        // Grow the team first. This mirrors the strongest early purchase available
-        // to the player and reaches the same five-creature cap.
-        while (Creatures.Count < RunRoster.MaxMembers && money >= CreaturePrice)
+        // Establish three bodies first, then add one per round. Leave room in the
+        // same ten-gold budget to invest in the early creatures from round one.
+        int growthTarget = Mathf.Min(RunRoster.MaxMembers, Mathf.Max(3, Creatures.Count + 1));
+        while (Creatures.Count < growthTarget && money >= CreaturePrice)
         {
             CreatureDataSO species = RandomSpecies(speciesPool);
             if (species == null) break;
             Creatures.Add(CreatureInstance.Generate(species));
             money -= CreaturePrice;
+        }
+
+        // Buy actual duplicates and use the normal merge progression. Finish level
+        // two across the team before pursuing level three; favor nearly complete levels.
+        bool boughtUpgrade = false;
+        while (money >= CreaturePrice)
+        {
+            CreatureInstance receiver = UpgradeTarget();
+            if (receiver == null) break;
+            int equipmentReserve = CheapestEquipmentPrice(itemPool, money);
+            if (boughtUpgrade && money - CreaturePrice < equipmentReserve) break;
+            CreatureInstance donor = CreatureInstance.Generate(receiver.Species);
+            if (donor == null || !receiver.TryMerge(donor)) break;
+            money -= CreaturePrice;
+            boughtUpgrade = true;
         }
 
         // Spend what remains on empty held-item and spray slots. Items persist into
@@ -56,7 +72,7 @@ public static class OpponentRoster
             }
             if (affordable.Count == 0) break;
 
-            CreatureItemSO purchase = affordable[Random.Range(0, affordable.Count)];
+            CreatureItemSO purchase = affordable[RunShop.ChooseItem(affordable)];
             List<CreatureInstance> recipients = new();
             foreach (CreatureInstance creature in Creatures)
             {
@@ -72,6 +88,28 @@ public static class OpponentRoster
         }
 
         LastSpent = RoundBudget - money;
+    }
+
+    private static CreatureInstance UpgradeTarget()
+    {
+        CreatureInstance best = null;
+        foreach (CreatureInstance creature in Creatures)
+        {
+            if (creature.Level >= CreatureInstance.MaxLevel) continue;
+            if (best == null || creature.Level < best.Level ||
+                (creature.Level == best.Level && creature.CopyCount > best.CopyCount)) best = creature;
+        }
+        return best;
+    }
+
+    private static int CheapestEquipmentPrice(IReadOnlyList<CreatureItemSO> items, int money)
+    {
+        int cheapest = int.MaxValue;
+        if (items != null)
+            foreach (CreatureItemSO item in items)
+                if (item != null && item.price <= money && HasOpenSlot(item.slot))
+                    cheapest = Mathf.Min(cheapest, item.price);
+        return cheapest == int.MaxValue ? 0 : cheapest;
     }
 
     private static bool HasOpenSlot(CreatureItemSlot slot)

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: RainCloud
   m_EditorClassIdentifier: Assembly-CSharp::AttackDataSO
   attackName: Rain Cloud
-  damage: 1
-  cooldown: 1.5
+  damage: 1.5
+  cooldown: 3
   range: 10
   duration: 0.25
   behavior: {fileID: 11400000, guid: c8e7301a655e42ee82807dbdf12d7a9d, type: 2}

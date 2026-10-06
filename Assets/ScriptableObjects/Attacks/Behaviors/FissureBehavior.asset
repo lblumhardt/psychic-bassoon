@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FissureBehaviorSO
   windupSeconds: 0.35
   length: 9
-  width: 0.85
+  width: 1.1
   zigzagOffset: 0.7
   segments: 7
   lifetimeSeconds: 4

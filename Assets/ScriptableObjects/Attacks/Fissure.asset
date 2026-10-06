@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Fissure
   m_EditorClassIdentifier: Assembly-CSharp::AttackDataSO
   attackName: Fissure
-  damage: 2
-  cooldown: 1.5
+  damage: 3.5
+  cooldown: 3
   range: 9
   duration: 0.25
   behavior: {fileID: 11400000, guid: a61fedeb115a477a94d5154030c23e6c, type: 2}

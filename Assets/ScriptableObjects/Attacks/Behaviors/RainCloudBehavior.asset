@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: RainCloudBehavior
   m_EditorClassIdentifier: Assembly-CSharp::RainCloudBehaviorSO
   windupSeconds: 0.4
-  lifetimeSeconds: 3
-  travelSpeed: 3.5
-  rainRadius: 2.2
+  lifetimeSeconds: 4
+  travelSpeed: 2.5
+  rainRadius: 2.6
   damageIntervalSeconds: 0.5
   cloudHeight: 3

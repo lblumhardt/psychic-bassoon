@@ -3,10 +3,12 @@ using UnityEngine;
 public enum CreatureItemSlot
 {
     HeldItem,
-    Spray
+    Spray,
+    Consumable
 }
 
 public enum SprayEffect { None, AngelAsh, FlowerScent, CourageCologne, ConfidenceCologne }
+public enum ConsumableEffect { None, Goop, HyperGoop, Botulinum, PartyGoop, HelpWantedSign, DoubleGoop, TwinBrother }
 
 [CreateAssetMenu(menuName = "Mons/Creature Item")]
 public class CreatureItemSO : ScriptableObject
@@ -15,6 +17,11 @@ public class CreatureItemSO : ScriptableObject
     [TextArea] public string description;
     public CreatureItemSlot slot;
     public SprayEffect sprayEffect;
+    public ConsumableEffect consumableEffect;
+    [Min(0.01f), Tooltip("Relative chance of appearing in the shop. 1 is common.")]
+    public float shopWeight = 1f;
+    public bool NeedsCreatureTarget => slot != CreatureItemSlot.Consumable ||
+        (consumableEffect != ConsumableEffect.PartyGoop && consumableEffect != ConsumableEffect.HelpWantedSign);
     [Min(0)] public int price = 2;
 
     [Header("Flat Stat Bonuses")]

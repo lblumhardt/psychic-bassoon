@@ -29,6 +29,8 @@ public class RebarProjectile : MonoBehaviour
     private float _postHitTravelRemaining;
     private Vector3 _lockedTravelVelocity;
     private Transform _owner;
+    private float _damage;
+    private Vector3 _launchPosition;
     private readonly HashSet<CreatureController> _knockedCreatures = new HashSet<CreatureController>();
 
     public bool HasLaunched => _hasLaunched;
@@ -41,7 +43,7 @@ public class RebarProjectile : MonoBehaviour
         else transform.position += step;
     }
 
-    public void Launch(Transform owner, Vector3 direction, float speed, float maxDistance)
+    public void Launch(Transform owner, Vector3 direction, float speed, float maxDistance, float damage = 0f)
     {
         if (_hasLaunched)
         {
@@ -50,6 +52,8 @@ public class RebarProjectile : MonoBehaviour
 
         _hasLaunched = true;
         _owner = owner;
+        _damage = Mathf.Max(0f, damage);
+        _launchPosition = transform.position;
         // maxDistance <= 0: no distance cap — projectile lives until maxLifetimeSeconds (and collisions / stick flow).
         _limitTravelDistance = maxDistance > 0f;
         _travelDistanceRemaining = _limitTravelDistance ? maxDistance : 0f;
@@ -155,9 +159,12 @@ public class RebarProjectile : MonoBehaviour
         CreatureController hitCreature = other.GetComponentInParent<CreatureController>();
         if (hitCreature != null && hitCreature != ownerCreature)
         {
+            if (hitCreature.IsDead || ownerCreature == null || hitCreature.Team == ownerCreature.Team) return;
             if (_knockedCreatures.Add(hitCreature))
             {
-                ApplyCreatureKnockback(hitCreature);
+                hitCreature.GetComponent<StatsComponent>()?.TakeDamage(_damage, ownerCreature,
+                    DamageKind.Normal, Vector3.Distance(_launchPosition, transform.position));
+                if (!hitCreature.IsDead) ApplyCreatureKnockback(hitCreature);
             }
 
             return;

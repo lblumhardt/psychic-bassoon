@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Gale
   m_EditorClassIdentifier: Assembly-CSharp::AttackDataSO
   attackName: Gale
-  damage: 0.5
+  damage: 2
   selectionWeight: 1
-  cooldown: 6
+  cooldown: 3.5
   range: 11
   duration: 0.15
   behavior: {fileID: 11400000, guid: ce8a210b2bbb4791987b36a906a2ba41, type: 2}
